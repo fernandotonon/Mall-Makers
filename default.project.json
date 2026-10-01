@@ -1,0 +1,33 @@
+{
+  "name": "MallMakers",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": { "$path": "src/ReplicatedStorage/Shared" },
+      "Config": { "$path": "src/ReplicatedStorage/Config" },
+      "Remotes": { "$className": "Folder" },
+      "Assets": { "$path": "assets/roblox/Assets.rbxm" }
+    },
+    "ServerScriptService": {
+      "Server": { "$path": "src/ServerScriptService" }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": { "$path": "src/StarterPlayer/StarterPlayerScripts" },
+      "$properties": { "CharacterWalkSpeed": 16, "CharacterJumpPower": 50 }
+    },
+    "StarterGui": {
+      "$path": "src/StarterGui",
+      "$properties": { "ResetPlayerGuiOnSpawn": false }
+    },
+    "Players": {
+      "$properties": { "MaxPlayers": 4, "CharacterAutoLoads": true }
+    },
+    "Workspace": {
+      "$properties": { "FilteringEnabled": true }
+    },
+    "Lighting": {
+      "$properties": { "Technology": "ShadowMap", "Brightness": 2, "ClockTime": 14, "Ambient": [0.45, 0.45, 0.5], "OutdoorAmbient": [0.6, 0.6, 0.65] }
+    },
+    "SoundService": { "$className": "SoundService" }
+  }
+}

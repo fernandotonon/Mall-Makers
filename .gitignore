@@ -1,0 +1,20 @@
+# Roblox / Rojo
+build/*.rbxl
+build/*.rbxlx
+build/*.rbxm
+*.rbxl.lock
+*.rbxlx.lock
+sourcemap.json
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Asset pipeline intermediates (large, reproducible from assets/source + scripts)
+assets/dumps/
+assets/tmp/
+assets/logs/
+assets/generated/
+assets/processed/
+assets/source/*.qtm3d
