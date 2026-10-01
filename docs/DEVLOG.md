@@ -1,5 +1,19 @@
 # Development log — Shoprise
 
+## 2026-10-01 (evening) — Feedback pass: lingering customers, balloon clutter, collapsible menu
+
+- Served customers lingered ~15 s at the counter: the queue walk waited on `Humanoid:MoveTo` (two
+  8 s rounds) before the leave logic could run. `NpcService.MoveTo` now takes a `shouldStop` callback,
+  checks it every 0.15 s, treats 2.5 studs as arrival and honours `MoveToFinished`; the queue loop
+  passes "served or leaving" as the stop condition. Measured: leaving 0.27 s after the sale.
+- Prompts only show when usable (`StoreService.RefreshPrompts`): Take box needs boxes on the pallet /
+  dock / stockroom, Restock needs shelf space, Serve / Help / Prepare need a waiting customer. The
+  pallet balloon hides when empty, empty counter balloons are gone, label distances were shortened.
+- Bottom menu collapses to a single "Menu" button; the four tabs expand on tap and an X collapses them.
+- Studio's Assistant now runs sandboxed in new windows (cannot reparent scripts or invoke the game's
+  BindableFunction). New Studio-only runner: write a test module into `ServerStorage.MMTest`, set the
+  `Run` attribute, read `Result`. Sync by rebuilding the .rbxl and reopening it.
+
 ## 2026-10-01 (later) — Published as Shoprise, drop action
 
 - The user published the experience (first as "Mall Makers", renamed to **Shoprise** because the name

@@ -68,7 +68,7 @@ local function label(parent, text, offsetY, size)
 	bb.Name = "Label"
 	bb.Size = size or UDim2.fromOffset(140, 36)
 	bb.StudsOffset = Vector3.new(0, offsetY or 4, 0)
-	bb.MaxDistance = 50
+	bb.MaxDistance = 32
 	local tl = Instance.new("TextLabel")
 	tl.Name = "Text"
 	tl.Size = UDim2.fromScale(1, 1)
@@ -95,6 +95,31 @@ local function evaluate(player)
 		S.ProgressService.Evaluate(player)
 	end
 end
+
+-- Prompt / label visibility: a prompt only shows when it can do something right now, so the
+-- store is not covered in balloons. Called from a slow loop and after state changes.
+local function refreshPrompts(st)
+	if st.Pallet then
+		st.Pallet.TakePrompt.Enabled = st.Pallet.Boxes > 0
+		st.Pallet.Label.Parent.Enabled = (st.Pallet.Boxes + st.Pallet.Pending) > 0
+	end
+	for _, sh in ipairs(st.Shelves) do
+		sh.Prompt.Enabled = sh.Stock < st.Cfg.ShelfCapacity
+	end
+	if st.Counter and st.Counter.Prompt then
+		local c = st.Queue[1]
+		local active = c ~= nil and (c.State == "Queued" or c.State == "Waiting") and not c.Busy
+		if st.Cfg.Interaction == "Restock" then
+			st.Counter.Prompt.Enabled = active
+		elseif st.Cfg.Interaction ~= "Match" then
+			st.Counter.Prompt.Enabled = active and c.State == "Waiting"
+		end
+	end
+	for _, d in ipairs(st.Displays) do
+		d.Prompt.Enabled = d.Customer ~= nil and d.Customer.State == "Waiting" and not d.Customer.Busy
+	end
+end
+StoreService.RefreshPrompts = refreshPrompts
 
 -- Accessors -------------------------------------------------------------------------
 
@@ -163,6 +188,9 @@ local function syncStock(st)
 		for i, v in ipairs(sh.Visuals) do
 			v.Transparency = i <= shown and 0 or 1
 		end
+	end
+	if st.Shelves[1] and st.Shelves[1].Prompt then
+		refreshPrompts(st)
 	end
 end
 
@@ -241,6 +269,9 @@ local function refreshPallet(st)
 		table.insert(p.Visuals, boxVisual(st.Folder, p.Part.CFrame * CFrame.new(-1.1 + col * 2.2, 0.25, 0) * CFrame.new(0, row * 2.05, 0)))
 	end
 	p.Label.Text = ("%s Boxes: %d%s"):format(ICON.Box, p.Boxes, p.Pending > 0 and (" (+%d arriving)"):format(p.Pending) or "")
+	if st.Pallet.TakePrompt then
+		refreshPrompts(st)
+	end
 end
 
 -- order one box of this store's product for its pallet (Mall 1 style delivery)
@@ -372,6 +403,7 @@ end
 
 function StoreService.JoinQueue(st, customer)
 	table.insert(st.Queue, customer)
+	refreshPrompts(st)
 	return #st.Queue
 end
 
@@ -380,6 +412,7 @@ function StoreService.LeaveQueue(st, customer)
 	if i then
 		table.remove(st.Queue, i)
 	end
+	refreshPrompts(st)
 end
 
 function StoreService.QueueIndex(st, customer)
@@ -866,7 +899,6 @@ local function addCounter(st, assetId, x, z, serveAction)
 		QueueDir = st.Frame.LookVector, -- +Z
 		ServeSpot = (st.Frame * CFrame.new(x, 0, z - size.Z / 2 - 1.5)).Position,
 	}
-	st.Counter.Label = label(part, "", size.Y + 1.5)
 	local p = prompt(part, serveAction or "Serve customer", st.Cfg.Name, { Distance = 10 })
 	st.Counter.Prompt = p
 	return st.Counter
@@ -895,6 +927,7 @@ local function addPallet(st, x, z)
 		end
 	end)
 	st.Pallet.OrderPrompt = order
+	st.Pallet.TakePrompt = take
 	refreshPallet(st)
 end
 
@@ -994,7 +1027,6 @@ local function buildInterior(st)
 			QueueDir = st.Frame.LookVector,
 			ServeSpot = (st.Frame * CFrame.new(0, 0, -2)).Position,
 		}
-		st.Counter.Label = label(st.Stations.Kiosk, "", 10, UDim2.fromOffset(160, 36))
 		st.Counter.Prompt = prompt(st.Stations.Kiosk, "Prepare order", "Food kiosk", { Distance = 11 })
 		st.Counter.Prompt.Triggered:Connect(function(player)
 			if near(player, st.Stations.Kiosk.Position, 14) then
@@ -1036,7 +1068,6 @@ local function buildInterior(st)
 			addMachine(st, spots[i][1], spots[i][2])
 		end
 		st.Counter = { Part = anchorOf(placeLocal(st, "CheckoutCounter", -12, 8, 180)), Spot = (st.Frame * CFrame.new(-12, 0, 11)).Position, QueueDir = st.Frame.LookVector, ServeSpot = (st.Frame * CFrame.new(-12, 0, 5)).Position }
-		st.Counter.Label = label(st.Counter.Part, "", 5)
 	end
 end
 
@@ -1073,6 +1104,7 @@ local function buildStore(player, mallId, floor, lot, profile)
 		remaining -= put
 	end
 	syncStock(st)
+	refreshPrompts(st)
 	return st
 end
 
@@ -1120,6 +1152,10 @@ local function refreshLogistics(lg)
 	end
 	s.Label.Text = ("%s Stockroom %d / %d"):format(ICON.Box, data.Boxes, data.Capacity)
 	s.Label.TextColor3 = data.Boxes >= data.Capacity and Color3.fromRGB(255, 120, 110) or Color3.new(1, 1, 1)
+	if d.TakePrompt then
+		d.TakePrompt.Enabled = d.Boxes > 0
+		s.TakePrompt.Enabled = data.Boxes > 0
+	end
 end
 
 function StoreService.OrderDelivery(player, lg)
@@ -1312,6 +1348,7 @@ local function buildLogistics(player, mallId, floor, profile)
 			StoreService.TakeDockBox(who, lg)
 		end
 	end)
+	lg.Dock.TakePrompt = take
 	-- stockroom rack
 	local rack = AssetRegistry.Place("StockroomRack", CFrame.new(origin + L.StockroomPos), folder, 0)
 	local rackPart = anchorOf(rack)
@@ -1329,6 +1366,7 @@ local function buildLogistics(player, mallId, floor, profile)
 			StoreService.TakeStockroomBox(who, lg)
 		end
 	end)
+	lg.Stockroom.TakePrompt = takeS
 	logistics[k] = lg
 	refreshLogistics(lg)
 	return lg
@@ -1523,6 +1561,16 @@ end
 
 function StoreService.Start()
 	S.FloorService.OnFloorReleased:Connect(releaseFloor)
+	task.spawn(function()
+		while true do
+			task.wait(0.5)
+			for _, st in pairs(stores) do
+				if S.FloorService.IsFloorActive(st.MallId, st.Floor) then
+					pcall(refreshPrompts, st)
+				end
+			end
+		end
+	end)
 	task.spawn(function()
 		while true do
 			task.wait(Economy.Simulation.TickSeconds)

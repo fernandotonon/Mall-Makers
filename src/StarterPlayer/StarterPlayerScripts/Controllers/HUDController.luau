@@ -52,23 +52,40 @@ local function build()
 	objectiveLabel = UI.Label(obj, "…", UDim2.new(1, 0, 0, 34), { Pos = UDim2.fromOffset(0, 14), Font = Enum.Font.GothamBold, TextSize = 15, VAlign = Enum.TextYAlignment.Top })
 	saveLabel = UI.Label(gui, "", UDim2.fromOffset(300, 18), { Pos = UDim2.new(1, -312, 0, 78), TextSize = 12, Color = UI.Colors.Warn, Align = Enum.TextXAlignment.Right })
 
-	-- bottom bar
+	-- bottom bar: collapsed to a single menu button by default; tap it to expand the four tabs
 	local mobile = UI.IsMobile()
 	local bh = mobile and 58 or 44
-	local bar = UI.Frame(gui, UDim2.fromOffset(mobile and 440 or 470, bh + 16), UDim2.new(0.5, mobile and -220 or -235, 1, -(bh + 16) - 12), UI.Colors.Bg, "Bar")
+	local barW = mobile and 440 or 470
+	local bar = UI.Frame(gui, UDim2.fromOffset(barW, bh + 16), UDim2.new(0.5, -barW / 2, 1, -(bh + 16) - 12), UI.Colors.Bg, "Bar")
 	bar.BackgroundTransparency = 0.1
+	bar.Visible = false
 	UI.Corner(bar, 16)
 	UI.Pad(bar, 8)
 	UI.List(bar, 8, true)
 	local tabs = { { "Business", "💼" }, { "Stores", "🏬" }, { "Workers", "🧑‍💼" }, { "Mall", "🏢" } }
 	for i, t in ipairs(tabs) do
-		UI.Button(bar, (mobile and "" or t[2] .. " ") .. t[1], UDim2.new(0.25, -6, 1, 0), UI.Colors.Card2, function()
+		UI.Button(bar, (mobile and "" or t[2] .. " ") .. t[1], UDim2.new(0.22, -6, 1, 0), UI.Colors.Card2, function()
 			HUD.OnOpenPanel:Fire(t[1])
-		end, { Order = i, TextSize = mobile and 15 or 15 })
+		end, { Order = i, TextSize = 15, Name = "Tab_" .. t[1] })
 	end
+	local collapse = UI.Button(bar, "X", UDim2.new(0.12, -6, 1, 0), UI.Colors.Card, nil, { Order = 9, TextSize = 18, Name = "Collapse" })
+	local menuW = mobile and 76 or 96
+	local menuButton = UI.Button(gui, "📋 Menu", UDim2.fromOffset(menuW, bh + 4), UI.Colors.Bg, nil, { Pos = UDim2.new(0.5, -menuW / 2, 1, -(bh + 4) - 12), TextSize = 16, Name = "Menu", Radius = 16 })
+	menuButton.BackgroundTransparency = 0.1
+	local function setExpanded(expanded)
+		bar.Visible = expanded
+		menuButton.Visible = not expanded
+	end
+	menuButton.Activated:Connect(function()
+		setExpanded(true)
+	end)
+	collapse.Activated:Connect(function()
+		setExpanded(false)
+	end)
+	HUD.SetMenuExpanded = setExpanded
 
 	-- drop button (visible while carrying something); sits left of the bottom bar, clear of the touch controls
-	local barHalf = mobile and 220 or 235
+	local barHalf = barW / 2
 	local dropW = mobile and 120 or 130
 	dropButton = UI.Button(gui, mobile and "📦 Drop" or "📦 Drop (Q)", UDim2.fromOffset(dropW, bh + 16), UI.Colors.Coral, function()
 		Remotes.Action:FireServer("DropCarry")
@@ -84,7 +101,7 @@ local function build()
 
 	-- hint (desktop)
 	if not mobile then
-		UI.Label(gui, "B: Business panel   ·   E / R: interact (prompts)   ·   Q: drop   ·   M: Mall tab", UDim2.fromOffset(520, 18), { Pos = UDim2.new(0.5, -260, 1, -14), TextSize = 12, Color = UI.Colors.Muted, Align = Enum.TextXAlignment.Center })
+		UI.Label(gui, "B: Business panel   ·   E / R: interact (prompts)   ·   Q: drop   ·   M: Mall tab   ·   Menu button expands the tabs", UDim2.fromOffset(520, 18), { Pos = UDim2.new(0.5, -260, 1, -14), TextSize = 12, Color = UI.Colors.Muted, Align = Enum.TextXAlignment.Center })
 	end
 end
 

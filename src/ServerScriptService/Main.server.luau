@@ -70,4 +70,30 @@ if game:GetService("RunService"):IsStudio() then
 	end
 end
 
+-- Studio-only test runner that works even when the Assistant / command bar runs sandboxed:
+-- write a test module's source into ServerStorage.MMTest (return function(Services) ... end),
+-- set its attribute Run = true, then read the attribute Result.
+if game:GetService("RunService"):IsStudio() then
+	local ServerStorage = game:GetService("ServerStorage")
+	local test = ServerStorage:FindFirstChild("MMTest") or Instance.new("ModuleScript")
+	test.Name = "MMTest"
+	test.Parent = ServerStorage
+	task.spawn(function()
+		while true do
+			task.wait(0.5)
+			if test:GetAttribute("Run") then
+				test:SetAttribute("Run", false)
+				test:SetAttribute("Result", "running")
+				local clone = test:Clone() -- fresh instance so require runs the new source
+				clone.Parent = ServerStorage
+				local ok, res = pcall(function()
+					return require(clone)(Services)
+				end)
+				clone:Destroy()
+				test:SetAttribute("Result", (ok and "" or "ERROR: ") .. tostring(res))
+			end
+		end
+	end)
+end
+
 print("[Shoprise] server booted")

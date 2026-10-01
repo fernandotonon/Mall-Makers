@@ -45,7 +45,7 @@ local function label(parent, text, offsetY, width)
 	local bb = Instance.new("BillboardGui")
 	bb.Size = UDim2.fromOffset(width or 240, 44)
 	bb.StudsOffset = Vector3.new(0, offsetY or 4, 0)
-	bb.MaxDistance = 70
+	bb.MaxDistance = 40
 	local tl = Instance.new("TextLabel")
 	tl.Size = UDim2.fromScale(1, 1)
 	tl.BackgroundColor3 = Color3.fromRGB(35, 40, 50)

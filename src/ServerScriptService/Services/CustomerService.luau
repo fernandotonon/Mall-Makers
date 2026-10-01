@@ -50,7 +50,7 @@ local function leave(c)
 	elseif c.Served then
 		bubble(c, ICON.Cash, Color3.fromRGB(40, 150, 80))
 	end
-	task.wait(0.8)
+	task.wait(0.25) -- served customers head out right away; the bubble stays while they walk
 	local lotX = S.MallService.LotCfg(st.MallId, st.LotId).Pos.X
 	S.NpcService.WalkPath(c.Npc, { lotFront(st), corridorPoint(st, lotX), corridorPoint(st, c.Entrance.X - S.MallService.FloorOrigin(st.MallId, st.Floor).X), c.Entrance }, 14)
 end
@@ -69,8 +69,8 @@ local function waitFor(c, predicate, timeout)
 end
 
 local function queueLoop(c, st, waitingState)
-	local idx = S.StoreService.JoinQueue(st, c)
 	c.State = "Queued"
+	local idx = S.StoreService.JoinQueue(st, c)
 	local lastIdx = nil
 	local patience = S.StoreService.Patience(st)
 	local started = os.clock()
@@ -84,7 +84,7 @@ local function queueLoop(c, st, waitingState)
 		end
 		if i ~= lastIdx then
 			lastIdx = i
-			S.NpcService.MoveTo(c.Npc, S.StoreService.QueueSpot(st, i), 8)
+			S.NpcService.MoveTo(c.Npc, S.StoreService.QueueSpot(st, i), 8, done)
 			if done() then
 				break
 			end

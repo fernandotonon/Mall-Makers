@@ -161,8 +161,9 @@ function NpcService.Face(npc, target)
 	root.CFrame = CFrame.lookAt(p, Vector3.new(target.X, p.Y, target.Z))
 end
 
--- Walks to position (ground point). Yields. Returns true on arrival, false on timeout / destroyed.
-function NpcService.MoveTo(npc, position, timeout)
+-- Walks to position (ground point). Yields. Returns true on arrival, false on timeout / destroyed /
+-- when shouldStop() turns true (checked every 0.15 s so callers can abort a walk at once).
+function NpcService.MoveTo(npc, position, timeout, shouldStop)
 	local hum = npc and npc:FindFirstChildOfClass("Humanoid")
 	local root = npc and npc.PrimaryPart
 	if not hum or not root then
@@ -170,35 +171,45 @@ function NpcService.MoveTo(npc, position, timeout)
 	end
 	timeout = timeout or 12
 	local deadline = os.clock() + timeout
+	local function flatDist()
+		return (Vector3.new(root.Position.X, 0, root.Position.Z) - Vector3.new(position.X, 0, position.Z)).Magnitude
+	end
 	while npc.Parent and os.clock() < deadline do
-		local flat = Vector3.new(position.X, root.Position.Y, position.Z)
-		if (root.Position - flat).Magnitude < 1.5 then
+		if flatDist() < 2.5 then
 			return true
 		end
+		if shouldStop and shouldStop() then
+			return false
+		end
 		hum:MoveTo(Vector3.new(position.X, root.Position.Y - hum.HipHeight, position.Z))
-		local arrived = false
-		local conn
-		conn = hum.MoveToFinished:Connect(function(reached)
-			arrived = reached
+		local finished, reached = false, false
+		local conn = hum.MoveToFinished:Connect(function(r)
+			finished, reached = true, r
 		end)
 		local t0 = os.clock()
-		while npc.Parent and os.clock() - t0 < 7.5 do
+		while npc.Parent and os.clock() - t0 < 8 do
 			task.wait(0.15)
-			local d = (Vector3.new(root.Position.X, 0, root.Position.Z) - Vector3.new(position.X, 0, position.Z)).Magnitude
-			if d < 1.5 or arrived then
+			if flatDist() < 2.5 or finished then
 				break
+			end
+			if shouldStop and shouldStop() then
+				conn:Disconnect()
+				return false
 			end
 		end
 		conn:Disconnect()
+		if reached or flatDist() < 2.5 then
+			return true
+		end
 	end
 	if not npc.Parent then
 		return false
 	end
-	local d = (Vector3.new(root.Position.X, 0, root.Position.Z) - Vector3.new(position.X, 0, position.Z)).Magnitude
-	if d >= 3 then
-		-- stuck: snap, so gameplay never blocks on physics
-		NpcService.Teleport(npc, position)
+	if shouldStop and shouldStop() then
+		return false
 	end
+	-- stuck: snap, so gameplay never blocks on physics
+	NpcService.Teleport(npc, position)
 	return true
 end
 

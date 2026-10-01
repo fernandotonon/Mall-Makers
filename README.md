@@ -65,9 +65,10 @@ python3 -m http.server 8765 --bind 127.0.0.1 &      # serve the project root
 # then run the contents of tools/studio_sync.luau in Studio's command bar (Edit mode)
 ```
 
-In Play mode, `game.ServerStorage.MMDebug:Invoke("Run", moduleScript)` runs a test ModuleScript
-(`return function(Services) ... end`) inside the live server context; `Invoke("<Service>", "<Fn>", ...)`
-calls one service function (tables come back as copies).
+In Play mode, write a test module (`return function(Services) ... end`) into the Source of
+`ServerStorage.MMTest`, set its attribute `Run = true` and read the attribute `Result`; the game runs it
+in its own context (works even when Studio's Assistant / command bar is sandboxed). The older
+`MMDebug:Invoke("Run", moduleScript)` hook still exists for unsandboxed sessions.
 
 ## Published experience
 
@@ -94,7 +95,8 @@ is prefixed with `Dev_` so production saves are never touched. When DataStores a
 | Interact (take box, restock, serve, help, repair, hire, contribute) | E (prompt)  | X     | Tap the prompt button    |
 | Secondary prompt (order box / delivery, store box) | R          | Y             | Tap the prompt button    |
 | Drop the carried box / basket | Q or Drop button        | –             | Drop button              |
-| Business panel                | B or bottom bar         | –             | Bottom bar               |
+| Open the tabs                 | Menu button (bottom)    | –             | Menu button              |
+| Business panel                | B or Menu ▸ Business    | –             | Menu ▸ Business          |
 | Mall tab (milestones, project, travel) | M or bottom bar | –           | Bottom bar               |
 | Minigames (match / assemble / repair) | Click icons     | –             | Tap icons                |
 
