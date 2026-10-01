@@ -34,7 +34,8 @@
 | Wage tick books wages and deducts cash; no unpaid workers with cash available | pass |
 | Rate limiter burst (Lune unit test) and currency formatting | pass |
 | Profile JSON-encodable (DataStore constraints) | pass |
-| Save / session lock / release / reload with the Studio mock store | see below |
+| Save / session lock / release / reload with the Studio mock store: save round-trips cash, lots, upgrades, stock; a fresh lock from another job blocks loading (3 retries, 6 s) and our own save refuses to overwrite it; a stale lock (> 180 s) is taken over; release + reload restores everything | pass |
+| iPhone 17 Pro device simulator (750x361): HUD cards, bottom bar between joystick and jump button, panel scrolls; no clipping | pass |
 
 **Bugs found and fixed**
 - Served customers had their items returned to the shelf: the queue walk loop overwrote the `Served`
@@ -44,6 +45,8 @@
 - Previous-mall income double-counted the manager's wage; now `stores × IncomePerMinutePerStore`
   (manager wage comes from the normal wage tick).
 - Gotham fonts lack ✔ ✕ ◻; replaced with emoji / ASCII.
+- matte.py's first rescue rule filled enclosed white holes (between chair legs, basket grid); now only
+  non-white, non-border-connected pixels are rescued.
 
 **Known limitations / needs Studio testing by a human**
 - Multiplayer (visiting, assist bonuses, visitor restrictions, project co-funding) was verified by code
