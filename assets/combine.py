@@ -14,7 +14,7 @@ def write_glb(p,js,bin_):
     bb=bin_+b'\0'*((4-len(bin_)%4)%4)
     open(p,'wb').write(b'glTF'+struct.pack('<II',2,12+8+len(jb)+8+len(bb))+struct.pack('<II',len(jb),0x4E4F534A)+jb+struct.pack('<II',len(bb),0x004E4942)+bb)
 out=sys.argv[1]; ids=sys.argv[2:]
-O={"asset":{"version":"2.0","generator":"MallMakers combine"},"scene":0,"scenes":[{"nodes":[]}],"nodes":[],"meshes":[],"materials":[],"textures":[],"images":[],"samplers":[],"accessors":[],"bufferViews":[],"buffers":[{"byteLength":0}]}
+O={"asset":{"version":"2.0","generator":"Shoprise combine"},"scene":0,"scenes":[{"nodes":[]}],"nodes":[],"meshes":[],"materials":[],"textures":[],"images":[],"samplers":[],"accessors":[],"bufferViews":[],"buffers":[{"byteLength":0}]}
 BIN=bytearray(); x=0.0
 for aid in ids:
     js,bin_=read_glb(f"{ROOT}/processed/{aid}.glb")

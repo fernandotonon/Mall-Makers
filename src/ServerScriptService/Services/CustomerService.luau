@@ -239,7 +239,7 @@ local function lifecycle(c)
 		end
 	end)
 	if not ok then
-		warn("[MallMakers] customer lifecycle: " .. tostring(err))
+		warn("[Shoprise] customer lifecycle: " .. tostring(err))
 	end
 	-- cleanup
 	if c.Display and c.Display.Customer == c then
@@ -314,7 +314,7 @@ function CustomerService.Start()
 			task.wait(1)
 			local ok, err = pcall(spawnerTick)
 			if not ok then
-				warn("[MallMakers] spawnerTick: " .. tostring(err))
+				warn("[Shoprise] spawnerTick: " .. tostring(err))
 			end
 		end
 	end)

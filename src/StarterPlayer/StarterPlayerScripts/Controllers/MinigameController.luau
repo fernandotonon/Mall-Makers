@@ -138,7 +138,7 @@ end
 
 local function build()
 	gui = Instance.new("ScreenGui")
-	gui.Name = "MallMakersMinigame"
+	gui.Name = "ShopriseMinigame"
 	gui.ResetOnSpawn = false
 	gui.DisplayOrder = 10
 	gui.Parent = player:WaitForChild("PlayerGui")

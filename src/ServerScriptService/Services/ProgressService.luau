@@ -261,7 +261,7 @@ function ProgressService.Start()
 				if player.Parent then
 					local ok, err = pcall(ProgressService.PushNow, player)
 					if not ok then
-						warn("[MallMakers] push: " .. tostring(err))
+						warn("[Shoprise] push: " .. tostring(err))
 						dirty[player] = nil
 					end
 				else

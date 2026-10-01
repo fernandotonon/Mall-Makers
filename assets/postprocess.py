@@ -4,7 +4,7 @@ generated/<id>.glb (QtMeshEditor roblox-meshpart bake) -> processed/<id>.glb
   1. no decimation: the mesh already comes out of the Roblox game-preset bake
   2. textures re-encoded as PNG (<=1024) and embedded in the GLB
   3. TRELLIS output is -Z-up: rotate to Y-up, front toward -Z, pivot at the bottom centre of the bbox
-     (every Mall Makers asset is placed by its bottom centre, see AssetRegistry)
+     (every Shoprise asset is placed by its bottom centre, see AssetRegistry)
 """
 import json,os,struct,sys,io,math
 from PIL import Image
@@ -64,7 +64,7 @@ def process(aid):
     size=[maxs[0]-mins[0], maxs[2]-mins[2], maxs[1]-mins[1]]
     for ni in js['scenes'][js.get('scene',0)]['nodes']:
         n=js['nodes'][ni]; n.pop('matrix',None); n['rotation']=q; n['translation']=[cx, ty, cy]
-    js.setdefault('asset',{})['generator']="MallMakers postprocess"
+    js.setdefault('asset',{})['generator']="Shoprise postprocess"
     js['asset']['extras']={"assetId":aid,"size":size,"targetSize":info["size"],"tris":tri_count(js)}
     out=f"{ROOT}/processed/{aid}.glb"; write_glb(out,js,bytes(newbin))
     print(f"[{aid}] -> {out} tris={tri_count(js)} size={[round(s,3) for s in size]} images={len(js.get('images',[]))}")

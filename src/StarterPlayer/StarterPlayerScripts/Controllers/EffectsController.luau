@@ -105,7 +105,7 @@ function Effects.Init() end
 
 function Effects.Start()
 	gui = Instance.new("ScreenGui")
-	gui.Name = "MallMakersEffects"
+	gui.Name = "ShopriseEffects"
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = true
 	gui.DisplayOrder = 20

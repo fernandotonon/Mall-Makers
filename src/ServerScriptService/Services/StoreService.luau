@@ -1502,7 +1502,7 @@ function StoreService.Start()
 			task.wait(Economy.Simulation.TickSeconds)
 			local ok, err = pcall(simulateTick)
 			if not ok then
-				warn("[MallMakers] simulateTick: " .. tostring(err))
+				warn("[Shoprise] simulateTick: " .. tostring(err))
 			end
 		end
 	end)

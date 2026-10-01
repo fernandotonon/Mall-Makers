@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Mall Makers asset batch. Per asset:
+# Shoprise asset batch. Per asset:
 #   trellis-cli (TRELLIS.2, geometry res 1024, 1024 px textures, --dump-post)  -> dumps/<id>.trellisraw
 #   raw2qtm3d.py                                                               -> dumps/<id>.qtm3d
 #   QtMeshEditor generate3d via the QTMESH_TRELLIS2_IMPORT seam, --game-preset roblox-meshpart (keeps the

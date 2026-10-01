@@ -1,4 +1,4 @@
-# QtMeshEditor → Roblox pipeline (Mall Makers)
+# QtMeshEditor → Roblox pipeline (Shoprise)
 
 Carried over from Data Core Clash (`../Data-Core-Clash/docs/QTMESH_ROBLOX_PIPELINE.md` has the full
 findings log). Settings for this project, as requested: **TRELLIS.2, geometry res 1024, 1024 px textures,
@@ -18,10 +18,10 @@ assets/source/<image>.png (ChatGPT renders, white studio background)
        QTMESH_TRELLIS2_IMPORT=dumps/<id>.qtm3d QtMeshEditor generate3d cutout/<id>.png -o generated/<id>.glb
            --backend pixal3d --tex-res 1024 --game-preset roblox-meshpart --matting best --no-source
   -> assets/postprocess.py     Y-up, front -Z, pivot bottom-centre, PNG textures embedded -> processed/<id>.glb
-  -> assets/combine.py         one GLB with one root node per asset -> processed/MallMakers_assets.glb
-  -> Studio File > Import 3D   (Upload to Roblox on) -> Workspace.MallMakers_assets with <id>_Node children
+  -> assets/combine.py         one GLB with one root node per asset -> processed/Shoprise_assets.glb
+  -> Studio File > Import 3D   (Upload to Roblox on) -> Workspace.Shoprise_assets with <id>_Node children
   -> assets/organize_import.lua  -> ReplicatedStorage.Assets.<id> (Model, PrimaryPart MeshPart, scaled, pivot)
-  -> File > Save to build/MallMakers.rbxl, then lune run tools/extract_assets.luau -> assets/roblox/Assets.rbxm
+  -> File > Save to build/Shoprise.rbxl, then lune run tools/extract_assets.luau -> assets/roblox/Assets.rbxm
 ```
 
 `gen_batch.sh` logs to `assets/logs/batch.log`; `[done] <id> rc=0 <seconds> game-ready: N -> M tris`.

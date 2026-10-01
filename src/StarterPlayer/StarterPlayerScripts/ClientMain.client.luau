@@ -10,7 +10,7 @@ for _, name in ipairs(ORDER) do
 	if c.Init then
 		local ok, err = pcall(c.Init)
 		if not ok then
-			warn(("[MallMakers] %s.Init: %s"):format(name, tostring(err)))
+			warn(("[Shoprise] %s.Init: %s"):format(name, tostring(err)))
 		end
 	end
 end
@@ -19,8 +19,8 @@ for _, name in ipairs(ORDER) do
 	if c.Start then
 		local ok, err = pcall(c.Start)
 		if not ok then
-			warn(("[MallMakers] %s.Start: %s"):format(name, tostring(err)))
+			warn(("[Shoprise] %s.Start: %s"):format(name, tostring(err)))
 		end
 	end
 end
-print("[MallMakers] client ready")
+print("[Shoprise] client ready")

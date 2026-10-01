@@ -94,7 +94,7 @@ function ActionService.Start()
 		payload = type(payload) == "table" and payload or {}
 		local ok, err = pcall(handlers[name], player, payload)
 		if not ok then
-			warn(("[MallMakers] action %s by %s failed: %s"):format(name, player.Name, tostring(err)))
+			warn(("[Shoprise] action %s by %s failed: %s"):format(name, player.Name, tostring(err)))
 		end
 	end)
 end

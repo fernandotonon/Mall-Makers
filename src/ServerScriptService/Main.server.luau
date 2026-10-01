@@ -33,7 +33,7 @@ for _, name in ipairs(ORDER) do
 	if svc.Init then
 		local ok, err = pcall(svc.Init, Services)
 		if not ok then
-			warn(("[MallMakers] %s.Init failed: %s"):format(name, tostring(err)))
+			warn(("[Shoprise] %s.Init failed: %s"):format(name, tostring(err)))
 		end
 	end
 end
@@ -43,7 +43,7 @@ for _, name in ipairs(ORDER) do
 	if svc.Start then
 		local ok, err = pcall(svc.Start)
 		if not ok then
-			warn(("[MallMakers] %s.Start failed: %s"):format(name, tostring(err)))
+			warn(("[Shoprise] %s.Start failed: %s"):format(name, tostring(err)))
 		end
 	end
 end
@@ -70,4 +70,4 @@ if game:GetService("RunService"):IsStudio() then
 	end
 end
 
-print("[MallMakers] server booted")
+print("[Shoprise] server booted")

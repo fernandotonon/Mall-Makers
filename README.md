@@ -1,4 +1,4 @@
-# Mall Makers
+# Shoprise (formerly Mall Makers; repo folder: Mall-Makers)
 
 A cooperative Roblox entrepreneurship game. Up to four players each own a floor of an unfinished
 shopping mall: serve customers, buy stock, reinvest in upgrades, discover and hire workers, lease new
@@ -46,8 +46,8 @@ build/                            built .rbxl (git-ignored)
 
 ```sh
 lune run tools/check.luau                 # syntax-check every .luau
-rojo build -o build/MallMakers.rbxl       # one-shot place file
-open build/MallMakers.rbxl                # opens in Roblox Studio
+rojo build -o build/Shoprise.rbxl       # one-shot place file
+open build/Shoprise.rbxl                # opens in Roblox Studio
 # or live sync: rojo serve, then Plugins > Rojo > Connect in Studio
 ```
 
@@ -71,7 +71,7 @@ calls one service function (tables come back as copies).
 
 ## Published experience
 
-- Experience "Mall Makers": universe `10768853423`, start place `96580292994685`
+- Experience "Shoprise": universe `10768853423`, start place `96580292994685`
   (https://www.roblox.com/games/96580292994685). Team Create is on for this place.
 - Re-publish after changes: open the place (File ▸ Open from Roblox) or sync sources into it with
   `tools/studio_sync.luau`, then *File ▸ Publish to Roblox*.
@@ -81,7 +81,7 @@ calls one service function (tables come back as copies).
 
 ## Saving
 
-Progress is stored per player in the DataStore `MallMakers_v1` with a session lock (another live server
+Progress is stored per player in the DataStore `Shoprise_v1` with a session lock (another live server
 cannot overwrite the profile; a stale lock is taken over after 3 minutes). Autosave every 60 s, on
 leave and on shutdown. **Dev mode**: in Studio, or with `Economy.Save.DevMode = true`, the store name
 is prefixed with `Dev_` so production saves are never touched. When DataStores are unavailable

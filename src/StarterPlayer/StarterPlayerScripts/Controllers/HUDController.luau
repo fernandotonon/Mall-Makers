@@ -23,7 +23,7 @@ local shownCash = 0
 
 local function build()
 	gui = Instance.new("ScreenGui")
-	gui.Name = "MallMakersHUD"
+	gui.Name = "ShopriseHUD"
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = false
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling

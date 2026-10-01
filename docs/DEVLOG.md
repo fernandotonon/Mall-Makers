@@ -1,4 +1,4 @@
-# Development log — Mall Makers
+# Development log — Shoprise
 
 ## 2026-10-01 — Vertical slice: Mall 1 complete, compact Mall 2, pipeline running
 

@@ -301,7 +301,7 @@ local function render()
 	end
 	local ok, err = pcall(tabs[currentTab], HUD.State)
 	if not ok then
-		warn("[MallMakers] panel render: " .. tostring(err))
+		warn("[Shoprise] panel render: " .. tostring(err))
 	end
 end
 
@@ -321,7 +321,7 @@ end
 
 local function build()
 	gui = Instance.new("ScreenGui")
-	gui.Name = "MallMakersPanel"
+	gui.Name = "ShoprisePanel"
 	gui.ResetOnSpawn = false
 	gui.DisplayOrder = 5
 	gui.Parent = player:WaitForChild("PlayerGui")

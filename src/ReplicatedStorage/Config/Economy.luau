@@ -6,8 +6,8 @@ return {
 	StartingCash = 250,
 
 	Save = {
-		StoreName = "MallMakers_v1",
-		DevPrefix = "Dev_", -- Studio (and DevMode) saves go to "Dev_MallMakers_v1" so production saves are never touched
+		StoreName = "Shoprise_v1",
+		DevPrefix = "Dev_", -- Studio (and DevMode) saves go to "Dev_Shoprise_v1" so production saves are never touched
 		DevMode = false, -- force dev saves outside Studio (e.g. a private test place)
 		AutosaveSeconds = 60,
 		SessionLockSeconds = 180, -- a lock older than this is considered stale (crashed server)

@@ -2,7 +2,7 @@
 	DataService — loads / saves player profiles with a session lock so two servers never overwrite
 	each other, autosaves, and saves on leave / shutdown.
 
-	Storage layout (DataStore "MallMakers_v1", key "Player_<userId>"):
+	Storage layout (DataStore "Shoprise_v1", key "Player_<userId>"):
 	  { Data = <profile>, Session = { Id = string, Time = os.time(), Job = game.JobId } | nil }
 
 	Dev mode: in Studio (or Economy.Save.DevMode) the store name is prefixed with "Dev_", so
@@ -173,7 +173,7 @@ local function writeProfile(player, release)
 		end)
 	end)
 	if not ok then
-		warn(("[MallMakers] save failed for %s: %s"):format(player.Name, tostring(err)))
+		warn(("[Shoprise] save failed for %s: %s"):format(player.Name, tostring(err)))
 		return false
 	end
 	return true
@@ -214,7 +214,7 @@ function DataService.Load(player)
 		if sessionId == "locked" then
 			task.wait(attempt == Economy.Save.LoadRetries and 0 or 3)
 		else
-			warn(("[MallMakers] load attempt %d for %s failed: %s"):format(attempt, player.Name, tostring(err)))
+			warn(("[Shoprise] load attempt %d for %s failed: %s"):format(attempt, player.Name, tostring(err)))
 			task.wait(2)
 		end
 	end
@@ -236,7 +236,7 @@ local function onPlayerAdded(player)
 		-- DataStores unavailable (Studio without API access, or persistent errors): play in memory, never save
 		profile = newProfile()
 		profile.NoSave = true
-		warn(("[MallMakers] %s is playing with an in-memory profile (no saving): %s"):format(player.Name, tostring(err)))
+		warn(("[Shoprise] %s is playing with an in-memory profile (no saving): %s"):format(player.Name, tostring(err)))
 	end
 	if not player.Parent then
 		return
@@ -262,15 +262,15 @@ function DataService.Init(services)
 	end)
 	if not ok then
 		if RunService:IsStudio() then
-			warn("[MallMakers] DataStore unavailable in Studio, using an in-memory mock store for this session: " .. tostring(err))
+			warn("[Shoprise] DataStore unavailable in Studio, using an in-memory mock store for this session: " .. tostring(err))
 			store = MockStore.new()
 			usingMock = true
 		else
-			warn("[MallMakers] DataStore unavailable: " .. tostring(err))
+			warn("[Shoprise] DataStore unavailable: " .. tostring(err))
 			store = nil
 		end
 	end
-	print(("[MallMakers] DataService store=%s devMode=%s"):format(storeName, tostring(devMode)))
+	print(("[Shoprise] DataService store=%s devMode=%s"):format(storeName, tostring(devMode)))
 end
 
 function DataService.Start()

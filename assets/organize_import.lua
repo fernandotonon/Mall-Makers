@@ -1,9 +1,9 @@
 -- Post-import organizer (run in Studio, Edit mode, e.g. through the MCP execute_luau tool).
--- Expects the 3D Importer result in Workspace named IMPORT_NAME (default "MallMakers_assets") with one child
+-- Expects the 3D Importer result in Workspace named IMPORT_NAME (default "Shoprise_assets") with one child
 -- MeshPart (or Model) per asset id. Moves each into ReplicatedStorage.Assets as Model{PrimaryPart=MeshPart},
 -- scales it to AssetRegistry.SIZES[id] by the longest axis, and sets PivotOffset so the pivot is the
 -- bottom centre (the AssetRegistry contract). Returns a report string.
-local IMPORT_NAME = IMPORT_NAME or "MallMakers_assets"
+local IMPORT_NAME = IMPORT_NAME or "Shoprise_assets"
 local RS = game:GetService("ReplicatedStorage")
 local AssetRegistry = require(RS.Shared.AssetRegistry)
 local SIZES = AssetRegistry.SIZES
@@ -48,5 +48,5 @@ for _, child in ipairs(import:GetChildren()) do
 	end
 end
 import:Destroy()
-game:GetService("ChangeHistoryService"):SetWaypoint("MallMakers organize import")
+game:GetService("ChangeHistoryService"):SetWaypoint("Shoprise organize import")
 return table.concat(report, "\n")

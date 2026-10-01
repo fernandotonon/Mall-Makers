@@ -87,7 +87,7 @@ function FloorService.BuildMallFloor(player, mallId)
 		if svc and svc.BuildFloor then
 			local ok, err = pcall(svc.BuildFloor, player, mallId, floor)
 			if not ok then
-				warn(("[MallMakers] %s.BuildFloor failed: %s"):format(name, tostring(err)))
+				warn(("[Shoprise] %s.BuildFloor failed: %s"):format(name, tostring(err)))
 			end
 		end
 	end
