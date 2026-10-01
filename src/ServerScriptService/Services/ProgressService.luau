@@ -201,6 +201,7 @@ local function snapshot(player)
 		Stats = { Served = profile.Stats.CustomersServed, Revenue = profile.Stats.LifetimeRevenue, Assist = profile.Stats.AssistEarned, Baskets = profile.Stats.BasketsReturned },
 		NoSave = profile.NoSave == true,
 		DevMode = S.DataService.IsDevMode(),
+		MockSave = S.DataService.IsMock(),
 		Accent = profile.Cosmetic.Accent,
 	}
 end

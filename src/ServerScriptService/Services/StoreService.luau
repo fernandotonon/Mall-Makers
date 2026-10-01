@@ -338,7 +338,7 @@ function StoreService.RestockShelf(st, shelf, units, by)
 	return added
 end
 
-local function onRestockPrompt(player, st, shelf)
+function StoreService.RestockFromCarry(player, st, shelf)
 	local c = Carry.Get(player)
 	if not c or c.Kind ~= "StockBox" then
 		S.MessageService.Toast(player, "Carry a stock box here first (take one from the delivery point).", "info")
@@ -521,6 +521,7 @@ local function openMinigame(player, st, customer, kind, payload)
 	local token = HttpService:GenerateGUID(false)
 	local rec = { Token = token, Player = player, Store = st, Customer = customer, Kind = kind, Expires = os.clock() + (payload.TimeLimit or 15), Expect = payload.Expect, Machine = payload.Machine }
 	minigames[token] = rec
+	StoreService.LastMinigame = rec -- Studio tests peek at this
 	if customer then
 		customer.Busy = player
 	end
@@ -547,7 +548,7 @@ local function openMinigame(player, st, customer, kind, payload)
 	return token
 end
 
-local function helpCustomerPrompt(player, st, customer)
+function StoreService.HelpCustomer(player, st, customer)
 	if not customer or customer.State ~= "Waiting" then
 		S.MessageService.Toast(player, "No customer is waiting right now.", "info")
 		return
@@ -651,7 +652,7 @@ function StoreService.AnswerMinigame(player, token, answer)
 end
 
 -- Electronics demo bonus (hold prompt at the demo bench after a correct match)
-local function demoPrompt(player, st)
+function StoreService.Demo(player, st)
 	local now = os.clock()
 	-- most recent customer that was just served with AwaitDemo still valid
 	local best
@@ -763,7 +764,7 @@ function StoreService.RepairMachine(st, m, by)
 	return true
 end
 
-local function repairPrompt(player, st, m)
+function StoreService.StartRepair(player, st, m)
 	if not m.Broken or m.Busy then
 		return
 	end
@@ -791,7 +792,7 @@ local function sign(st, text, color)
 	p.Anchored = true
 	p.CanCollide = false
 	p.Color = color
-	p.CFrame = st.Frame * CFrame.new(0, 11.4, S.MallService.LOT_D / 2 + 1.2)
+	p.CFrame = st.Frame * CFrame.new(0, 11.4, S.MallService.LOT_D / 2 + 1.2) * CFrame.Angles(0, math.pi, 0) -- face the corridor
 	p.Parent = st.Folder
 	local sg = Instance.new("SurfaceGui")
 	sg.Face = Enum.NormalId.Front
@@ -848,7 +849,7 @@ local function addShelf(st, index, assetId, x, z, yaw, browseOffset)
 	shelf.Label = label(part, "", size.Y + 1.5)
 	shelf.Prompt = prompt(part, "Restock", st.Cfg.Name, { Distance = 9 })
 	shelf.Prompt.Triggered:Connect(function(player)
-		onRestockPrompt(player, st, shelf)
+		StoreService.RestockFromCarry(player, st, shelf)
 	end)
 	table.insert(st.Shelves, shelf)
 	return shelf
@@ -905,7 +906,7 @@ local function addDisplay(st, assetId, x, z)
 	d.Prompt = prompt(part, "Help customer", st.Cfg.Name, { Distance = 10 })
 	d.Prompt.Triggered:Connect(function(player)
 		if near(player, part.Position) then
-			helpCustomerPrompt(player, st, d.Customer)
+			StoreService.HelpCustomer(player, st, d.Customer)
 		end
 	end)
 	table.insert(st.Displays, d)
@@ -940,7 +941,7 @@ local function addMachine(st, x, z)
 	rec.Prompt.Enabled = false
 	rec.Prompt.Triggered:Connect(function(player)
 		if near(player, part.Position) then
-			repairPrompt(player, st, rec)
+			StoreService.StartRepair(player, st, rec)
 		end
 	end)
 	table.insert(st.Machines, rec)
@@ -971,7 +972,7 @@ local function buildInterior(st)
 		end
 		-- the rack doubles as the stock shelf
 		addShelf(st, 1, "ClothesTable", -11, -7, 180, 4)
-		st.Shelves[1].Label.StudsOffset = Vector3.new(0, 4.5, 0)
+		st.Shelves[1].Label.Parent.StudsOffset = Vector3.new(0, 4.5, 0)
 		addCounter(st, "CheckoutCounter", -9, 7, "Help customer")
 		st.Counter.Prompt.Enabled = false
 		addPallet(st, 12, 8)
@@ -1002,7 +1003,7 @@ local function buildInterior(st)
 					S.MessageService.Toast(player, "Not enough ingredients in the pantry. Restock it first.", "bad")
 					return
 				end
-				helpCustomerPrompt(player, st, c)
+				StoreService.HelpCustomer(player, st, c)
 			end
 		end)
 		addPallet(st, 12, 8)
@@ -1015,7 +1016,7 @@ local function buildInterior(st)
 					S.MessageService.Toast(player, "No gadgets in stock. Restock the display from the stockroom.", "bad")
 					return
 				end
-				helpCustomerPrompt(player, st, c)
+				StoreService.HelpCustomer(player, st, c)
 			end
 		end)
 		addShelf(st, 1, "Shelf", -10, -8, 180, 4)
@@ -1024,7 +1025,7 @@ local function buildInterior(st)
 		local demo = prompt(st.Stations.Demo, "Demo product", "Demo bench", { Hold = 1.5, Distance = 9 })
 		demo.Triggered:Connect(function(player)
 			if near(player, st.Stations.Demo.Position) then
-				demoPrompt(player, st)
+				StoreService.Demo(player, st)
 			end
 		end)
 		label(st.Stations.Demo, "🎧 Demo bench", 5.5)

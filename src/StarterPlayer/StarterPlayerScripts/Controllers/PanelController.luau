@@ -86,7 +86,7 @@ tabs.Business = function(state)
 				local pr = row(c, 4)
 				UI.Button(pr, ("📦 Order box (%s)"):format(Format.Cash(lot.BoxCost)), UDim2.new(0, 190, 1, 0), UI.Colors.Accent, function()
 					act("OrderStock", { MallId = mall.Id, LotId = lot.Id })
-				end, { Order = 1, TextSize = 14 })
+				end, { Order = 1, TextSize = 14, Name = "OrderStock_" .. lot.Id })
 				UI.Label(pr, ("At delivery point: %d box(es)%s"):format(lot.PalletBoxes or 0, (lot.PalletPending or 0) > 0 and (" · %d arriving"):format(lot.PalletPending) or ""), UDim2.new(1, -200, 1, 0), { TextSize = 13, Color = UI.Colors.Muted, Order = 2 })
 			end
 			UI.Label(c, "Upgrades (reinvest profit)", UDim2.new(1, 0, 0, 18), { TextSize = 12, Color = UI.Colors.Muted, Order = 5 })
@@ -94,11 +94,11 @@ tabs.Business = function(state)
 				local ur = row(c, 10 + i)
 				ur.Size = UDim2.new(1, 0, 0, 40)
 				if up.Owned then
-					UI.Label(ur, "✔ " .. up.Name, UDim2.new(0, 170, 1, 0), { TextSize = 14, Color = UI.Colors.Good, Order = 1, Bg = UI.Colors.Card2 })
+					UI.Label(ur, "✅ " .. up.Name, UDim2.new(0, 170, 1, 0), { TextSize = 14, Color = UI.Colors.Good, Order = 1, Bg = UI.Colors.Card2 })
 				else
 					UI.Button(ur, ("%s · %s"):format(up.Name, Format.Cash(up.Cost)), UDim2.new(0, 170, 1, 0), UI.Colors.Coral, function()
 						act("BuyUpgrade", { MallId = mall.Id, LotId = lot.Id, UpgradeId = up.Id })
-					end, { Order = 1, TextSize = 13 })
+					end, { Order = 1, TextSize = 13, Name = "Upgrade_" .. lot.Id .. "_" .. up.Id })
 				end
 				UI.Label(ur, up.Desc, UDim2.new(1, -180, 1, 0), { TextSize = 12, Color = UI.Colors.Muted, Order = 2 })
 			end
@@ -140,12 +140,12 @@ tabs.Stores = function(state)
 		local desc = ({ Restock = "Carry stock boxes to shelves, serve at the counter.", Match = "Match customers' outfit symbols at the display.", Assemble = "Assemble food orders at the kiosk stations.", MatchDemo = "Match the gadget a customer wants, run a demo for a bonus.", Repair = "Keep arcade machines running with quick repair sequences." })[lot.Interaction]
 		UI.Label(c, desc, UDim2.new(1, 0, 0, 20), { TextSize = 13, Color = UI.Colors.Muted, Order = 2 })
 		if lot.Owned then
-			UI.Label(c, "✔ Open", UDim2.new(0, 120, 0, 30), { TextSize = 14, Color = UI.Colors.Good, Order = 3, Bg = UI.Colors.Card2, Align = Enum.TextXAlignment.Center })
+			UI.Label(c, "✅ Open", UDim2.new(0, 120, 0, 30), { TextSize = 14, Color = UI.Colors.Good, Order = 3, Bg = UI.Colors.Card2, Align = Enum.TextXAlignment.Center })
 		else
 			local r = row(c, 3)
 			UI.Button(r, ("Lease for %s"):format(Format.Cash(lot.Cost)), UDim2.new(0, 170, 1, 0), UI.Colors.Coral, function()
 				act("BuyLot", { MallId = mall.Id, LotId = lot.Id })
-			end, { Order = 1, TextSize = 14 })
+			end, { Order = 1, TextSize = 14, Name = "Lease_" .. lot.Id })
 			UI.Label(r, "You must be on your own floor in this mall.", UDim2.new(1, -180, 1, 0), { TextSize = 12, Color = UI.Colors.Muted, Order = 2 })
 		end
 	end
@@ -203,7 +203,7 @@ tabs.Workers = function(state)
 			local mc = card(content, 2 + other.Id)
 			UI.Label(mc, ("📋 %s"):format(other.Name), UDim2.new(1, 0, 0, 24), { Font = Enum.Font.GothamBold, TextSize = 16, Order = 1 })
 			if other.ManagerAssigned then
-				UI.Label(mc, "✔ A manager runs this mall. It earns a modest net income every minute while you are elsewhere.", UDim2.new(1, 0, 0, 36), { TextSize = 13, Color = UI.Colors.Good, Order = 2 })
+				UI.Label(mc, "✅ A manager runs this mall. It earns a modest net income every minute while you are elsewhere.", UDim2.new(1, 0, 0, 36), { TextSize = 13, Color = UI.Colors.Good, Order = 2 })
 			else
 				UI.Label(mc, "Assign a Manager so this mall keeps earning (modestly) while you build here.", UDim2.new(1, 0, 0, 20), { TextSize = 13, Color = UI.Colors.Muted, Order = 2 })
 				UI.Button(mc, "Assign manager", UDim2.new(0, 170, 0, 34), UI.Colors.Accent, function()
@@ -230,28 +230,28 @@ tabs.Mall = function(state)
 	for name, amt in pairs(pj.Contributors) do
 		table.insert(contribs, ("%s %s"):format(name, Format.Cash(amt)))
 	end
-	UI.Label(pc, ("%s / %s%s · you: %s%s"):format(Format.Cash(pj.Progress), Format.Cash(pj.Cost), pj.Complete and " ✔ complete" or "", Format.Cash(mall.MyContribution), #contribs > 0 and ("\nContributors: " .. table.concat(contribs, ", ")) or ""), UDim2.new(1, 0, 0, 40), { TextSize = 13, Order = 4 })
+	UI.Label(pc, ("%s / %s%s · you: %s%s"):format(Format.Cash(pj.Progress), Format.Cash(pj.Cost), pj.Complete and " ✅ complete" or "", Format.Cash(mall.MyContribution), #contribs > 0 and ("\nContributors: " .. table.concat(contribs, ", ")) or ""), UDim2.new(1, 0, 0, 40), { TextSize = 13, Order = 4 })
 	if not pj.Complete then
 		UI.Button(pc, ("Contribute %s"):format(Format.Cash(pj.Step)), UDim2.new(0, 170, 0, 34), UI.Colors.Accent, function()
 			act("Contribute", { MallId = mall.Id })
-		end, { Order = 5, TextSize = 14 })
+		end, { Order = 5, TextSize = 14, Name = "Contribute" })
 	end
 	-- unlock next
 	if mall.Unlock then
 		local uc = card(content, 2)
 		UI.Label(uc, ("🏢 Next: %s"):format(mall.Unlock.NextMall or "?"), UDim2.new(1, 0, 0, 24), { Font = Enum.Font.GothamBold, TextSize = 17, Order = 1 })
 		for i, ms in ipairs(mall.Unlock.Milestones) do
-			UI.Label(uc, (ms.Done and "✔  " or "◻  ") .. ms.Text, UDim2.new(1, 0, 0, 20), { TextSize = 14, Color = ms.Done and UI.Colors.Good or UI.Colors.Text, Order = 1 + i })
+			UI.Label(uc, (ms.Done and "✅ " or "⬜ ") .. ms.Text, UDim2.new(1, 0, 0, 20), { TextSize = 14, Color = ms.Done and UI.Colors.Good or UI.Colors.Text, Order = 1 + i })
 		end
 		if mall.Unlock.Unlocked then
-			UI.Label(uc, "✔ Unlocked. Travel from the Mall Transit sign on your floor, or:", UDim2.new(1, 0, 0, 20), { TextSize = 13, Color = UI.Colors.Good, Order = 50 })
+			UI.Label(uc, "✅ Unlocked. Travel from the Mall Transit sign on your floor, or:", UDim2.new(1, 0, 0, 20), { TextSize = 13, Color = UI.Colors.Good, Order = 50 })
 			UI.Button(uc, "Travel to " .. (mall.Unlock.NextMall or ""), UDim2.new(0, 220, 0, 34), UI.Colors.Accent, function()
 				act("Travel", { MallId = mall.Id + 1 })
 			end, { Order = 51, TextSize = 14 })
 		else
 			UI.Button(uc, ("%s · %s"):format(mall.Unlock.Text, Format.Cash(mall.Unlock.OpeningCost)), UDim2.new(0, 320, 0, 34), mall.Unlock.AllDone and UI.Colors.Coral or UI.Colors.Card2, function()
 				act("UnlockMall", { MallId = mall.Id })
-			end, { Order = 50, TextSize = 14 })
+			end, { Order = 50, TextSize = 14, Name = "UnlockMall" })
 			UI.Label(uc, "Your stores here stay yours. A manager can run them later for passive income.", UDim2.new(1, 0, 0, 20), { TextSize = 12, Color = UI.Colors.Muted, Order = 51 })
 		end
 	end
@@ -280,7 +280,7 @@ tabs.Style = function(state)
 	r.Size = UDim2.new(1, 0, 0, 40)
 	local colors = { Color3.fromRGB(64, 150, 150), Color3.fromRGB(240, 120, 100), Color3.fromRGB(140, 110, 200), Color3.fromRGB(250, 170, 60), Color3.fromRGB(90, 180, 90) }
 	for i, col in ipairs(colors) do
-		UI.Button(r, state.Accent == i and "✔" or "", UDim2.new(0, 40, 1, 0), col, function()
+		UI.Button(r, state.Accent == i and "●" or "", UDim2.new(0, 40, 1, 0), col, function()
 			act("SetAccent", { Index = i })
 		end, { Order = i })
 	end
@@ -338,7 +338,7 @@ local function build()
 	local header = UI.Frame(root, UDim2.new(1, 0, 0, 44), nil, UI.Colors.Bg)
 	header.BackgroundTransparency = 1
 	titleLabel = UI.Label(header, "Business", UDim2.new(1, -60, 1, 0), { Pos = UDim2.fromOffset(16, 0), Font = Enum.Font.GothamBlack, TextSize = 20 })
-	UI.Button(header, "✕", UDim2.fromOffset(36, 32), UI.Colors.Card2, Panel.Close, { Pos = UDim2.new(1, -44, 0, 6) })
+	UI.Button(header, "X", UDim2.fromOffset(36, 32), UI.Colors.Card2, Panel.Close, { Pos = UDim2.new(1, -44, 0, 6), Name = "Close" })
 	local tabBar = UI.Frame(root, UDim2.new(1, -24, 0, 36), UDim2.fromOffset(12, 46), UI.Colors.Bg)
 	tabBar.BackgroundTransparency = 1
 	UI.List(tabBar, 6, true)

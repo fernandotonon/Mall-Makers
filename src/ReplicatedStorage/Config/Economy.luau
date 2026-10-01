@@ -59,9 +59,11 @@ return {
 	PreviousMall = {
 		-- Income from a completed mall once a manager is assigned (online only for the MVP).
 		-- Target: about 10-20% of the next mall's first expansion cost in ~10 minutes.
-		IncomePerMinutePerStore = 25, -- net of simulated operating costs
-		ManagerWagePerMinute = 40, -- deducted from that income
-		RequiresWorkerPerStore = true,
+		-- The manager's own wage is paid by the normal wage tick (Workers.Manager.Wage), so the net is
+		-- roughly stores * IncomePerMinutePerStore - 40. Three staffed stores: ~50/min net -> ~500 in
+		-- 10 minutes = 18% of the Downtown Electronics lease (2800).
+		IncomePerMinutePerStore = 30, -- gross, after simulated operating costs
+		RequiresWorkerPerStore = true, -- only stores that still have a (paid) worker produce
 	},
 
 	Satisfaction = {

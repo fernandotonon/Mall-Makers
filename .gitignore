@@ -18,3 +18,4 @@ assets/logs/
 assets/generated/
 assets/processed/
 assets/source/*.qtm3d
+build/

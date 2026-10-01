@@ -12,6 +12,6 @@ return {
 		-- arcade repair steps
 		Wrench = "🔧", Plug = "🔌", Chip = "💾",
 		-- misc
-		Cash = "💰", Box = "📦", Worker = "🧑‍💼", Lock = "🔒", Check = "✔", Elevator = "🛗", Basket = "🧺",
+		Cash = "💰", Box = "📦", Worker = "🧑‍💼", Lock = "🔒", Check = "✅", Elevator = "🛗", Basket = "🧺",
 	},
 }

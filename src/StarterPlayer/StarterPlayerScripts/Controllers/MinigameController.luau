@@ -89,7 +89,7 @@ local function open(data)
 				trayLabel.Text = "Tray: (empty)"
 			end
 		end, { Order = 10, TextSize = 16, Radius = 16 })
-		UI.Button(optionsRow, "Serve ✔", UDim2.fromOffset(110, 84), UI.Colors.Good, function()
+		UI.Button(optionsRow, "Serve ✅", UDim2.fromOffset(110, 84), UI.Colors.Good, function()
 			if active then
 				send(active.Tray)
 			end
@@ -145,7 +145,7 @@ local function build()
 	local scale = Instance.new("UIScale")
 	scale.Scale = UI.Scale()
 	scale.Parent = gui
-	root = UI.Frame(gui, UDim2.fromOffset(460, 250), UDim2.new(0.5, -230, 0.5, -60), UI.Colors.Bg, "Minigame")
+	root = UI.Frame(gui, UDim2.fromOffset(460, 280), UDim2.new(0.5, -230, 0.5, -200), UI.Colors.Bg, "Minigame")
 	root.BackgroundTransparency = 0.04
 	root.Visible = false
 	UI.Corner(root, 18)
@@ -161,8 +161,8 @@ local function build()
 	UI.Corner(tbg, 4)
 	timerBar = UI.Frame(tbg, UDim2.fromScale(1, 1), nil, UI.Colors.Accent)
 	UI.Corner(timerBar, 4)
-	resultLabel = UI.Label(root, "", UDim2.new(1, 0, 0, 26), { Pos = UDim2.fromOffset(0, 196), Font = Enum.Font.GothamBlack, TextSize = 20, Align = Enum.TextXAlignment.Center })
-	UI.Button(root, "✕", UDim2.fromOffset(30, 30), UI.Colors.Card2, close, { Pos = UDim2.new(1, -30, 0, -4) })
+	resultLabel = UI.Label(root, "", UDim2.new(1, 0, 0, 26), { Pos = UDim2.fromOffset(0, 200), Font = Enum.Font.GothamBlack, TextSize = 20, Align = Enum.TextXAlignment.Center })
+	UI.Button(root, "X", UDim2.fromOffset(30, 30), UI.Colors.Card2, close, { Pos = UDim2.new(1, -30, 0, -4), Name = "Close" })
 end
 
 function Minigame.Init() end
@@ -173,7 +173,7 @@ function Minigame.Start()
 		if data.Close then
 			if active and active.Token == data.Token then
 				if data.Result then
-					resultLabel.Text = data.Result == "ok" and "✔ Correct!" or "✖ Wrong"
+					resultLabel.Text = data.Result == "ok" and "✅ Correct!" or "❌ Wrong"
 					resultLabel.TextColor3 = data.Result == "ok" and UI.Colors.Good or UI.Colors.Bad
 					task.delay(0.8, function()
 						if active and active.Token == data.Token then

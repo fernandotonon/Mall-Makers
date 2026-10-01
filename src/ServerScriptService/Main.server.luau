@@ -56,6 +56,12 @@ if game:GetService("RunService"):IsStudio() then
 	bf.Name = "MMDebug"
 	bf.Parent = ServerStorage
 	bf.OnInvoke = function(serviceName, fnName, ...)
+		if serviceName == "Run" then
+			-- run a test ModuleScript inside the live server context (tables returned through a
+			-- BindableFunction are copies, so tests pass code in instead). The module must return
+			-- function(Services, ...) -> string.
+			return require(fnName)(Services, ...)
+		end
 		local svc = Services[serviceName]
 		assert(svc, "no service " .. tostring(serviceName))
 		local fn = svc[fnName]

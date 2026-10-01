@@ -70,11 +70,14 @@ end
 
 local function queueLoop(c, st, waitingState)
 	local idx = S.StoreService.JoinQueue(st, c)
-	c.State = idx == 1 and waitingState or "Queued"
+	c.State = "Queued"
 	local lastIdx = nil
 	local patience = S.StoreService.Patience(st)
 	local started = os.clock()
-	while alive(c) and c.State ~= "Served" and c.State ~= "Leaving" do
+	local function done()
+		return c.Served or c.State == "Served" or c.State == "Leaving"
+	end
+	while alive(c) and not done() do
 		local i = S.StoreService.QueueIndex(st, c)
 		if not i then
 			break
@@ -82,22 +85,24 @@ local function queueLoop(c, st, waitingState)
 		if i ~= lastIdx then
 			lastIdx = i
 			S.NpcService.MoveTo(c.Npc, S.StoreService.QueueSpot(st, i), 8)
+			if done() then
+				break
+			end
 			S.NpcService.Face(c.Npc, st.Counter.Part.Position)
 			if i == 1 then
-				if waitingState == "Waiting" and c.State ~= "Waiting" then
+				if waitingState == "Waiting" and c.State == "Queued" then
 					c.State = "Waiting"
 					c.Request = c.Request or S.StoreService.RandomRequest(st)
 					bubble(c, S.StoreService.RequestText(st, c.Request))
 					started = os.clock()
 				elseif waitingState == "Queued" then
-					c.State = "Queued"
 					bubble(c, "🧾")
 				end
 			else
 				bubble(c, "⏳")
 			end
 		end
-		if os.clock() - started > patience and not c.Busy then
+		if os.clock() - started > patience and not c.Busy and not done() then
 			-- gave up waiting
 			c.Angry = true
 			S.StoreService.LeaveQueue(st, c)
@@ -141,7 +146,7 @@ local function lifecycleRestock(c, st)
 	S.StoreService.SyncStock(st)
 	bubble(c, ("%s x%d"):format(st.Cfg.ProductIcon, c.Items))
 	queueLoop(c, st, "Queued")
-	if c.State ~= "Served" and c.Shelf then
+	if not c.Served and c.Shelf then
 		-- items go back to the shelf
 		c.Shelf.Stock = math.min(st.Cfg.ShelfCapacity, c.Shelf.Stock + c.Items)
 		S.StoreService.SyncStock(st)

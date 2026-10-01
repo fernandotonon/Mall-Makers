@@ -141,7 +141,7 @@ local function managedIncome(player)
 					stores += 1
 				end
 			end
-			local income = stores * Economy.PreviousMall.IncomePerMinutePerStore - Economy.PreviousMall.ManagerWagePerMinute
+			local income = stores * Economy.PreviousMall.IncomePerMinutePerStore
 			if income > 0 then
 				total += income
 				local anyLot = next(m.Lots)

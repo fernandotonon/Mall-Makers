@@ -120,6 +120,8 @@ local function applyState(state)
 	objectiveLabel.Text = state.CurrentObjective or "All objectives complete. Keep growing!"
 	if state.NoSave then
 		saveLabel.Text = "⚠ Progress is not being saved (no DataStore access)"
+	elseif state.MockSave then
+		saveLabel.Text = "Studio: saves live in memory for this session only"
 	elseif state.DevMode then
 		saveLabel.Text = "Dev save slot"
 	else

@@ -102,8 +102,9 @@ end
 
 function MallService.Entrances(mallId, floor)
 	return {
-		MallService.ToWorld(mallId, floor, Vector3.new(40, 0, 42)),
-		MallService.ToWorld(mallId, floor, Vector3.new(-40, 0, 42)),
+		-- beside the escalators (not at their foot, or walkers would climb to the next floor)
+		MallService.ToWorld(mallId, floor, Vector3.new(54, 0, 44)),
+		MallService.ToWorld(mallId, floor, Vector3.new(-54, 0, 44)),
 	}
 end
 

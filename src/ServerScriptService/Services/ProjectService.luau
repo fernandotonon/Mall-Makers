@@ -53,7 +53,7 @@ end
 local function refreshBoards(mallId)
 	local info = ProjectService.GetProgress(mallId)
 	for _, b in pairs(boards[mallId] or {}) do
-		b.Label.Text = ("%s\n%s / %s%s"):format(info.Name, Format.Cash(info.Progress), Format.Cash(info.Cost), info.Complete and "  ✔ DONE" or "")
+		b.Label.Text = ("%s\n%s / %s%s"):format(info.Name, Format.Cash(info.Progress), Format.Cash(info.Cost), info.Complete and "  ✅ DONE" or "")
 		b.Bar.Size = UDim2.fromScale(math.clamp(info.Progress / info.Cost, 0, 1), 1)
 		b.Prompt.Enabled = not info.Complete
 	end
