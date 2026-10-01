@@ -8,12 +8,15 @@ QtMeshEditor `--game-preset roblox-meshpart` (keeps the preset's ≤ 20k triangl
 
 ```
 assets/source/<image>.png (ChatGPT renders, white studio background)
-  -> assets/cutout.py          flood-fills the border-connected white to alpha -> cutout/<id>.png
+  -> assets/matte.py           HIGH-QUALITY MATTE: BiRefNet 1024 (the model behind QtMeshEditor's
+                               `--matting best`), threshold 0.5 / feather band, uniform-background rescue,
+                               crop + re-pad to 85 % of a square -> cutout/<id>.png (RGBA)
+                               (assets/cutout.py is the older flood-fill matte, kept for comparison)
   -> assets/gen_batch.sh       per asset:
        trellis-cli --model trellis --res 1024 --tex-res 1024 --dump-post dumps/<id>.trellisraw
        raw2qtm3d.py             dump -> QTM3D container
        QTMESH_TRELLIS2_IMPORT=dumps/<id>.qtm3d QtMeshEditor generate3d cutout/<id>.png -o generated/<id>.glb
-           --backend pixal3d --tex-res 1024 --game-preset roblox-meshpart --no-source
+           --backend pixal3d --tex-res 1024 --game-preset roblox-meshpart --matting best --no-source
   -> assets/postprocess.py     Y-up, front -Z, pivot bottom-centre, PNG textures embedded -> processed/<id>.glb
   -> assets/combine.py         one GLB with one root node per asset -> processed/MallMakers_assets.glb
   -> Studio File > Import 3D   (Upload to Roblox on) -> Workspace.MallMakers_assets with <id>_Node children
@@ -24,6 +27,17 @@ assets/source/<image>.png (ChatGPT renders, white studio background)
 `gen_batch.sh` logs to `assets/logs/batch.log`; `[done] <id> rc=0 <seconds> game-ready: N -> M tris`.
 If a generation makes no log progress for 45 minutes it is killed and retried at res 512 (logged in
 `logs/res512_fallback.txt`). Deleting `generated/<id>.glb` re-generates that id on the next run.
+
+## Matte
+
+The user asked for the high-quality matte. QtMeshEditor's "best" tier is BiRefNet 1024² (MIT, ~930 MB,
+`~/Library/Application Support/QtMeshEditor/QtMeshEditor/ai_models/rembg/birefnet.onnx`); it has no
+standalone CLI, so `assets/matte.py` runs the same ONNX model with onnxruntime (`pip install --user
+onnxruntime`) and mirrors `BackgroundRemover.cpp`: ImageNet normalisation, sigmoid alpha, threshold 0.5
+with a ±0.15 feather band, border-connected-white rescue (BiRefNet drops the storefront's inner floor,
+the rescue puts it back), crop to the subject and pad to 85 %. ~9 s per image on CPU. The first five
+assets (Storefront, Shelf, StockBox, CheckoutCounter, ShutterDoor) had been generated from the
+flood-fill matte; those GLBs were moved to `assets/generated_floodmatte/` and the ids re-queued.
 
 ## Timings observed (Apple M5, 24 GB, Oct 1 2026, machine also running Studio)
 

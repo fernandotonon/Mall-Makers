@@ -24,8 +24,8 @@ src/
     Controllers/                  HUD, Panel (business/stores/workers/mall/style), Minigame, Effects, UI helpers
 assets/
   source/                         36 concept images + manifest.json (asset id -> image, size, preset)
-  cutout/                         background-removed PNGs fed to TRELLIS (cutout.py)
-  gen_batch.sh, raw2qtm3d.py, postprocess.py, combine.py, organize_import.lua   asset pipeline
+  cutout/                         background-removed PNGs fed to TRELLIS (matte.py: BiRefNet high-quality matte)
+  matte.py, gen_batch.sh, raw2qtm3d.py, postprocess.py, combine.py, organize_import.lua   asset pipeline
   roblox/Assets.rbxm              imported meshes (Rojo-mapped into ReplicatedStorage.Assets)
   placeholders/README.md          the placeholder replacement contract
 tools/                            check.luau (syntax), test_ratelimiter.luau, studio_sync.luau, extract_assets.luau
@@ -147,7 +147,7 @@ Everything lives in `src/ReplicatedStorage/Config/`:
 ## Asset pipeline (QtMeshEditor)
 
 See `docs/QTMESH_ROBLOX_PIPELINE.md` and `assets/placeholders/README.md`. Short version:
-`assets/gen_batch.sh` → `postprocess.py` → `combine.py` → Studio *Import 3D* → `organize_import.lua` →
+`assets/matte.py` (BiRefNet matte) → `assets/gen_batch.sh` → `postprocess.py` → `combine.py` → Studio *Import 3D* → `organize_import.lua` →
 `lune run tools/extract_assets.luau`. The game runs with code-built placeholders until a mesh exists for
 an id; `AssetRegistry.Spawn(id)` swaps automatically.
 

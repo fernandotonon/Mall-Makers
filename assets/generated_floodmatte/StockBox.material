@@ -1,0 +1,41 @@
+
+material qtmesh_gen3d_1_1790854271278_mesh_mat
+{
+	technique
+	{
+		pass 
+		{
+			ambient 0.9 0.9 0.9 1
+
+			texture_unit diffuse_map
+			{
+				texture qtmesh_gen3d_1_1790854271278_diffuse.png 10
+				colour_op_ex modulate src_texture src_diffuse
+				colour_op_multipass_fallback dest_colour zero
+			}
+
+			texture_unit normal_map
+			{
+				texture qtmesh_gen3d_1_1790854271278_normal.png 10
+				colour_op_ex source1 src_current src_current
+				colour_op_multipass_fallback dest_colour zero
+			}
+
+			texture_unit roughness
+			{
+				texture qtmesh_gen3d_1_1790854271278_roughness.png 10
+				colour_op_ex source1 src_current src_current
+				colour_op_multipass_fallback dest_colour zero
+			}
+
+			texture_unit metallic
+			{
+				texture qtmesh_gen3d_1_1790854271278_metallic.png 10
+				colour_op_ex source1 src_current src_current
+				colour_op_multipass_fallback dest_colour zero
+			}
+		}
+
+	}
+
+}

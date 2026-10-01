@@ -84,6 +84,7 @@ tabs.Business = function(state)
 			stat(info, "Customers served", tostring(lot.Ledger.Served), UI.Colors.Text, 4)
 			if lot.HasPallet then
 				local pr = row(c, 4)
+				pr.Name = "OrderRow"
 				UI.Button(pr, ("📦 Order box (%s)"):format(Format.Cash(lot.BoxCost)), UDim2.new(0, 190, 1, 0), UI.Colors.Accent, function()
 					act("OrderStock", { MallId = mall.Id, LotId = lot.Id })
 				end, { Order = 1, TextSize = 14, Name = "OrderStock_" .. lot.Id })

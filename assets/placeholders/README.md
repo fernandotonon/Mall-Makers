@@ -6,7 +6,7 @@ loaded by the game.
 
 ## How a generated asset replaces a placeholder
 
-1. `assets/gen_batch.sh <Id>` generates `assets/generated/<Id>.glb` (TRELLIS.2 at 1024 geometry,
+1. `python3 assets/matte.py <Id>` makes the BiRefNet (high-quality) matte, then `assets/gen_batch.sh <Id>` generates `assets/generated/<Id>.glb` (TRELLIS.2 at 1024 geometry,
    QtMeshEditor `--game-preset roblox-meshpart` bake, 1024 px PBR).
 2. `python3 assets/postprocess.py <Id>` -> `assets/processed/<Id>.glb` (Y-up, front -Z, pivot at the
    bottom centre, PNG textures embedded).
