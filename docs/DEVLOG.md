@@ -1,5 +1,15 @@
 # Development log — Shoprise
 
+## 2026-10-01 (later) — Published as Shoprise, drop action
+
+- The user published the experience (first as "Mall Makers", renamed to **Shoprise** because the name
+  was taken): universe 10768853423, place 96580292994685. Content was synced into the published place
+  through the MCP and published from the File menu (System Events).
+- Drop action: Q key or the Drop button (shown while carrying) puts the box/basket on the floor in front
+  of the player with a "Pick up" prompt; stock boxes nobody picks up return to their pallet / stockroom /
+  dock after 150 s; lost-delivery boxes stay until picked up. Tested: drop lands on the floor (y 0.1),
+  pick-up restores the same carry data, expiry returns the box to the pallet.
+
 ## 2026-10-01 — Vertical slice: Mall 1 complete, compact Mall 2, pipeline running
 
 **Built**

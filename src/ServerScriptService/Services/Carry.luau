@@ -7,6 +7,12 @@ local AssetRegistry = require(ReplicatedStorage.Shared.AssetRegistry)
 
 local Carry = {}
 local carried = {} -- player -> { Kind, Data, Model }
+-- Dropped items lie on the floor with a "Pick up" prompt. Stock boxes that nobody picks up again go
+-- back to their source after DROP_TIMEOUT seconds (StoreService installs the handler); lost-delivery
+-- boxes never expire; baskets just vanish (new ones respawn anyway).
+local DROP_TIMEOUT = 150
+Carry.OnExpire = nil -- function(kind, data) set by StoreService
+local droppedFolder
 
 local ASSET_FOR = { StockBox = "StockBox", LostBox = "StockBox", Basket = "Basket" }
 
@@ -73,8 +79,83 @@ function Carry.Take(player, kind)
 	return c
 end
 
+local function ensureDropped()
+	if not droppedFolder or not droppedFolder.Parent then
+		droppedFolder = workspace:FindFirstChild("Dropped") or Instance.new("Folder")
+		droppedFolder.Name = "Dropped"
+		droppedFolder.Parent = workspace
+	end
+	return droppedFolder
+end
+
+-- Puts the carried object down in front of the character. Returns true when something was dropped.
 function Carry.Drop(player)
-	Carry.Take(player)
+	local c = Carry.Take(player)
+	if not c then
+		return false
+	end
+	local char = player.Character
+	local root = char and char:FindFirstChild("HumanoidRootPart")
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	if not root then
+		if Carry.OnExpire then
+			Carry.OnExpire(c.Kind, c.Data)
+		end
+		return true
+	end
+	-- find the floor under a point just in front of the character (fall back to the computed feet height)
+	local ahead = root.Position + root.CFrame.LookVector * 2.5
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	local filter = { char }
+	local npcs = workspace:FindFirstChild("NPCs")
+	if npcs then table.insert(filter, npcs) end
+	local dropped = workspace:FindFirstChild("Dropped")
+	if dropped then table.insert(filter, dropped) end
+	params.FilterDescendantsInstances = filter
+	local hit = workspace:Raycast(ahead + Vector3.new(0, 1, 0), Vector3.new(0, -12, 0), params)
+	local pos
+	if hit then
+		pos = hit.Position
+	else
+		pos = ahead - Vector3.new(0, (hum and hum.HipHeight or 2) + root.Size.Y / 2, 0)
+	end
+	local model = AssetRegistry.Place(ASSET_FOR[c.Kind] or "StockBox", CFrame.new(pos) * CFrame.Angles(0, math.random() * math.pi * 2, 0), ensureDropped(), 0)
+	model.Name = "Dropped_" .. c.Kind
+	local anchor = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart", true)
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.ActionText = "Pick up"
+	prompt.ObjectText = c.Kind == "Basket" and "Basket" or (c.Kind == "LostBox" and "Lost delivery" or "Stock box")
+	prompt.MaxActivationDistance = 8
+	prompt.HoldDuration = 0
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = anchor
+	local alive = true
+	prompt.Triggered:Connect(function(who)
+		if not alive then
+			return
+		end
+		local whoRoot = who.Character and who.Character:FindFirstChild("HumanoidRootPart")
+		if not whoRoot or (whoRoot.Position - anchor.Position).Magnitude > 12 then
+			return
+		end
+		if Carry.Give(who, c.Kind, c.Data) then
+			alive = false
+			model:Destroy()
+		end
+	end)
+	if c.Kind ~= "LostBox" then
+		task.delay(DROP_TIMEOUT, function()
+			if alive then
+				alive = false
+				model:Destroy()
+				if c.Kind == "StockBox" and Carry.OnExpire then
+					Carry.OnExpire(c.Kind, c.Data)
+				end
+			end
+		end)
+	end
+	return true
 end
 
 return Carry

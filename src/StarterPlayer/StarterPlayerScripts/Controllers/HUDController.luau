@@ -18,7 +18,7 @@ HUD.OnState = Signal.new()
 HUD.OnOpenPanel = Signal.new() -- (tabName)
 
 local player = Players.LocalPlayer
-local gui, cashLabel, placeLabel, objectiveLabel, toastHolder, saveLabel
+local gui, cashLabel, placeLabel, objectiveLabel, toastHolder, saveLabel, dropButton
 local shownCash = 0
 
 local function build()
@@ -67,6 +67,14 @@ local function build()
 		end, { Order = i, TextSize = mobile and 15 or 15 })
 	end
 
+	-- drop button (visible while carrying something); sits left of the bottom bar, clear of the touch controls
+	local barHalf = mobile and 220 or 235
+	local dropW = mobile and 120 or 130
+	dropButton = UI.Button(gui, mobile and "📦 Drop" or "📦 Drop (Q)", UDim2.fromOffset(dropW, bh + 16), UI.Colors.Coral, function()
+		Remotes.Action:FireServer("DropCarry")
+	end, { Pos = UDim2.new(0.5, -(barHalf + 10 + dropW), 1, -(bh + 16) - 12), TextSize = 16, Name = "Drop", Radius = 16 })
+	dropButton.Visible = false
+
 	-- toasts
 	toastHolder = UI.Frame(gui, UDim2.fromOffset(420, 200), UDim2.new(0.5, -210, 1, -(bh + 16) - 12 - 210), Color3.new(), "Toasts")
 	toastHolder.BackgroundTransparency = 1
@@ -76,7 +84,7 @@ local function build()
 
 	-- hint (desktop)
 	if not mobile then
-		UI.Label(gui, "B: Business panel   ·   E / R: interact (prompts)   ·   M: Mall tab", UDim2.fromOffset(520, 18), { Pos = UDim2.new(0.5, -260, 1, -14), TextSize = 12, Color = UI.Colors.Muted, Align = Enum.TextXAlignment.Center })
+		UI.Label(gui, "B: Business panel   ·   E / R: interact (prompts)   ·   Q: drop   ·   M: Mall tab", UDim2.fromOffset(520, 18), { Pos = UDim2.new(0.5, -260, 1, -14), TextSize = 12, Color = UI.Colors.Muted, Align = Enum.TextXAlignment.Center })
 	end
 end
 
@@ -153,11 +161,27 @@ function HUD.Start()
 			end
 		end
 	end)
+	-- show the drop button while the character carries something (server-set attribute)
+	local function watchCharacter(character)
+		local function refresh()
+			dropButton.Visible = character:GetAttribute("Carrying") ~= nil
+		end
+		character:GetAttributeChangedSignal("Carrying"):Connect(refresh)
+		refresh()
+	end
+	if player.Character then
+		watchCharacter(player.Character)
+	end
+	player.CharacterAdded:Connect(watchCharacter)
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if processed then
 			return
 		end
-		if input.KeyCode == Enum.KeyCode.B then
+		if input.KeyCode == Enum.KeyCode.Q then
+			if player.Character and player.Character:GetAttribute("Carrying") then
+				Remotes.Action:FireServer("DropCarry")
+			end
+		elseif input.KeyCode == Enum.KeyCode.B then
 			HUD.OnOpenPanel:Fire("Business")
 		elseif input.KeyCode == Enum.KeyCode.M then
 			HUD.OnOpenPanel:Fire("Mall")

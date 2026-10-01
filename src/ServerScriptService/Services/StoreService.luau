@@ -1491,8 +1491,34 @@ local function simulateTick()
 	end
 end
 
+-- a dropped stock box that nobody picked up again goes back to where it came from
+local function returnBox(kind, data)
+	if kind ~= "StockBox" or type(data) ~= "table" then
+		return
+	end
+	if data.Source == "Pallet" and data.Store then
+		local st = stores[data.Store]
+		if st and st.Pallet and st.Pallet.Boxes < st.Cfg.MaxPendingBoxes then
+			st.Pallet.Boxes += 1
+			refreshPallet(st)
+		end
+	elseif (data.Source == "Stockroom" or data.Source == "Dock") and data.Mall then
+		for _, lg in pairs(logistics) do
+			if lg.MallId == data.Mall then
+				if data.Source == "Stockroom" then
+					StoreService.StoreBoxInStockroom(nil, lg)
+				else
+					lg.Dock.Boxes += 1
+					refreshLogistics(lg)
+				end
+			end
+		end
+	end
+end
+
 function StoreService.Init(services)
 	S = services
+	Carry.OnExpire = returnBox
 end
 
 function StoreService.Start()

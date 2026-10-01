@@ -93,6 +93,7 @@ is prefixed with `Dev_` so production saves are never touched. When DataStores a
 |-------------------------------|-------------------------|---------------|--------------------------|
 | Interact (take box, restock, serve, help, repair, hire, contribute) | E (prompt)  | X     | Tap the prompt button    |
 | Secondary prompt (order box / delivery, store box) | R          | Y             | Tap the prompt button    |
+| Drop the carried box / basket | Q or Drop button        | –             | Drop button              |
 | Business panel                | B or bottom bar         | –             | Bottom bar               |
 | Mall tab (milestones, project, travel) | M or bottom bar | –           | Bottom bar               |
 | Minigames (match / assemble / repair) | Click icons     | –             | Tap icons                |

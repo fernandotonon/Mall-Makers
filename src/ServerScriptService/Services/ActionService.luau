@@ -72,6 +72,13 @@ handlers.SetAccent = function(player, p)
 	S.ProgressService.SetAccent(player, p.Index)
 end
 
+handlers.DropCarry = function(player)
+	local Carry = require(script.Parent.Carry)
+	if not Carry.Drop(player) then
+		S.MessageService.Toast(player, "You are not carrying anything.", "info")
+	end
+end
+
 handlers.GoHome = function(player)
 	S.FloorService.TeleportHome(player)
 end
