@@ -69,6 +69,16 @@ In Play mode, `game.ServerStorage.MMDebug:Invoke("Run", moduleScript)` runs a te
 (`return function(Services) ... end`) inside the live server context; `Invoke("<Service>", "<Fn>", ...)`
 calls one service function (tables come back as copies).
 
+## Published experience
+
+- Experience "Mall Makers": universe `10768853423`, start place `96580292994685`
+  (https://www.roblox.com/games/96580292994685). Team Create is on for this place.
+- Re-publish after changes: open the place (File ▸ Open from Roblox) or sync sources into it with
+  `tools/studio_sync.luau`, then *File ▸ Publish to Roblox*.
+- Icon and thumbnail files are in `assets/branding/` (`icon_512.png`, `thumbnail_1920x1080.png`);
+  they are set on Creator Hub (experience ▸ Basic Settings ▸ Game Icon / Thumbnails), not in Studio.
+- Access is private by default; switch it on Creator Hub (Audience ▸ Access) to let friends in.
+
 ## Saving
 
 Progress is stored per player in the DataStore `MallMakers_v1` with a session lock (another live server
