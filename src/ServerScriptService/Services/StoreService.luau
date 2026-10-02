@@ -1108,8 +1108,9 @@ local function buildInterior(st)
 		if hit then
 			tray:PivotTo(CFrame.new(hit.Position) * (tray:GetPivot() - tray:GetPivot().Position))
 		end
-		addShelf(st, 1, "Shelf", -13, -8, 90, 0)
-		st.Shelves[1].Spot = (st.Frame * CFrame.new(-9, 0, -8)).Position
+		-- pantry shelf against the side wall (lot wall at x=-18), front facing into the store
+		addShelf(st, 1, "Shelf", -16, -8, -90, 0)
+		st.Shelves[1].Spot = (st.Frame * CFrame.new(-12, 0, -8)).Position
 		-- the kiosk front acts as the counter where customers queue with orders
 		st.Counter = {
 			Part = st.Stations.Kiosk,
