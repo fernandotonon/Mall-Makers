@@ -80,4 +80,16 @@ return {
 	},
 
 	MoneyPopDurationSeconds = 1.2,
+
+	Leaderboards = {
+		-- all-time boards on the south wall of every floor (OrderedDataStore "<Dev_>Shoprise_LB_v1_<Id>")
+		Boards = {
+			{ Id = "Cash", Title = "Richest", Path = "Cash" },
+			{ Id = "Revenue", Title = "Top sellers (lifetime sales)", Path = "Stats.LifetimeRevenue" },
+			{ Id = "Served", Title = "Most customers served", Path = "Stats.CustomersServed" },
+		},
+		WriteIntervalSeconds = 90, -- each player's values are written at most this often (and on leave)
+		RefreshSeconds = 60,
+		TopN = 10,
+	},
 }

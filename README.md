@@ -128,6 +128,8 @@ All interactions are ProximityPrompts or big icon buttons: no typing, no aiming.
   the sum of the present contributors; completion is saved for every contributor (solo completion works).
   Mall 1: elevator restoration (teleporting elevator with floor buttons). Mall 2: loading dock expansion
   (bigger deliveries).
+- **Leaderboards**: three all-time boards on the south wall of every floor (richest, top sellers, most
+  customers served) backed by OrderedDataStores (`Economy.Leaderboards`).
 - **Recovery**: stray baskets on every floor pay $5 each at the basket stand.
 - **Progression**: objectives card, milestones (own all lots, 2 workers, project, $4,000 sales), opening
   project cost, then a floor in **Mall 2, Downtown Mall**.

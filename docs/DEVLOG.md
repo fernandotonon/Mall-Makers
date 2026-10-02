@@ -1,5 +1,14 @@
 # Development log — Shoprise
 
+## 2026-10-01 (night) — Leaderboards and a lighter phone HUD
+
+- `LeaderboardService`: three all-time boards (Richest, Top sellers, Most customers served) on the south
+  wall of every floor, OrderedDataStores `Shoprise_LB_v1_<Id>` (Dev_ prefix in Studio), writes every
+  90 s and on leave, refresh every 60 s; without DataStore access the boards list the server's players.
+- HUD: cash pill top-centre with mall/floor under it, objective card flush top-right, IgnoreGuiInset
+  on, phone UIScale now 0.7–1.0 from the viewport (an S20's 915x412 viewport gives 0.72) so the world
+  stays visible; checked in the device simulator at 915x412.
+
 ## 2026-10-01 (evening) — Feedback pass: lingering customers, balloon clutter, collapsible menu
 
 - Served customers lingered ~15 s at the counter: the queue walk waited on `Humanoid:MoveTo` (two

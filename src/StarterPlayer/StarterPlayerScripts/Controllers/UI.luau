@@ -27,7 +27,9 @@ function UI.Scale()
 	local vp = cam and cam.ViewportSize or Vector2.new(1280, 720)
 	local s = math.clamp(math.min(vp.X / 1280, vp.Y / 720), 0.6, 1.15)
 	if UI.IsMobile() then
-		s = math.max(s, 0.85) * 1.1
+		-- phones: keep the HUD small so the world stays visible (an S20 viewport is ~915x412 -> 0.72);
+		-- buttons stay tappable because they are 44-58 px tall before scaling on 2.5-3x density screens
+		s = math.clamp(math.min(vp.X / 1280, vp.Y / 720) * 1.25, 0.7, 1.0)
 	end
 	return s
 end

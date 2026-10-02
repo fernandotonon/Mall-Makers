@@ -25,7 +25,7 @@ local function build()
 	gui = Instance.new("ScreenGui")
 	gui.Name = "ShopriseHUD"
 	gui.ResetOnSpawn = false
-	gui.IgnoreGuiInset = false
+	gui.IgnoreGuiInset = true
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	gui.Parent = player:WaitForChild("PlayerGui")
 	local scale = Instance.new("UIScale")
@@ -34,27 +34,27 @@ local function build()
 	workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
 		scale.Scale = UI.Scale()
 	end)
+	local mobile = UI.IsMobile()
 
-	-- cash card (top-left)
-	local cash = UI.Frame(gui, UDim2.fromOffset(230, 74), UDim2.fromOffset(12, 12), UI.Colors.Bg, "CashCard")
-	cash.BackgroundTransparency = 0.1
+	-- cash pill (top centre): the number everyone glances at, with mall / floor in small text under it
+	local cashW, cashH = mobile and 170 or 210, mobile and 50 or 58
+	local cash = UI.Frame(gui, UDim2.fromOffset(cashW, cashH), UDim2.new(0.5, -cashW / 2, 0, 6), UI.Colors.Bg, "CashCard")
+	cash.BackgroundTransparency = 0.15
 	UI.Corner(cash, 14)
-	UI.Pad(cash, 10)
-	cashLabel = UI.Label(cash, "$0", UDim2.new(1, 0, 0, 34), { Font = Enum.Font.GothamBlack, TextSize = 30, Color = UI.Colors.Good })
-	placeLabel = UI.Label(cash, "", UDim2.new(1, 0, 0, 20), { Pos = UDim2.fromOffset(0, 36), TextSize = 14, Color = UI.Colors.Muted })
+	cashLabel = UI.Label(cash, "$0", UDim2.new(1, 0, 0, mobile and 28 or 32), { Pos = UDim2.fromOffset(0, 3), Font = Enum.Font.GothamBlack, TextSize = mobile and 24 or 28, Color = UI.Colors.Good, Align = Enum.TextXAlignment.Center })
+	placeLabel = UI.Label(cash, "", UDim2.new(1, 0, 0, 16), { Pos = UDim2.fromOffset(0, mobile and 30 or 35), TextSize = mobile and 11 or 12, Color = UI.Colors.Muted, Align = Enum.TextXAlignment.Center })
 
-	-- objective card (top-right)
-	local obj = UI.Frame(gui, UDim2.fromOffset(300, 64), UDim2.new(1, -312, 0, 12), UI.Colors.Bg, "ObjectiveCard")
-	obj.BackgroundTransparency = 0.1
-	UI.Corner(obj, 14)
-	UI.Pad(obj, 10)
-	UI.Label(obj, "OBJECTIVE", UDim2.new(1, 0, 0, 14), { Font = Enum.Font.GothamBold, TextSize = 11, Color = UI.Colors.Muted })
-	objectiveLabel = UI.Label(obj, "…", UDim2.new(1, 0, 0, 34), { Pos = UDim2.fromOffset(0, 14), Font = Enum.Font.GothamBold, TextSize = 15, VAlign = Enum.TextYAlignment.Top })
-	saveLabel = UI.Label(gui, "", UDim2.fromOffset(300, 18), { Pos = UDim2.new(1, -312, 0, 78), TextSize = 12, Color = UI.Colors.Warn, Align = Enum.TextXAlignment.Right })
+	-- objective card: flush with the top-right corner, compact
+	local objW, objH = mobile and 230 or 300, mobile and 46 or 56
+	local obj = UI.Frame(gui, UDim2.fromOffset(objW, objH), UDim2.new(1, -objW - 6, 0, 6), UI.Colors.Bg, "ObjectiveCard")
+	obj.BackgroundTransparency = 0.15
+	UI.Corner(obj, 12)
+	UI.Label(obj, "OBJECTIVE", UDim2.new(1, -12, 0, 12), { Pos = UDim2.fromOffset(8, 3), Font = Enum.Font.GothamBold, TextSize = 9, Color = UI.Colors.Muted })
+	objectiveLabel = UI.Label(obj, "…", UDim2.new(1, -12, 1, -16), { Pos = UDim2.fromOffset(8, 14), Font = Enum.Font.GothamBold, TextSize = mobile and 12 or 14, VAlign = Enum.TextYAlignment.Top })
+	saveLabel = UI.Label(gui, "", UDim2.fromOffset(objW, 14), { Pos = UDim2.new(1, -objW - 6, 0, objH + 8), TextSize = 10, Color = UI.Colors.Warn, Align = Enum.TextXAlignment.Right })
 
 	-- bottom bar: collapsed to a single menu button by default; tap it to expand the four tabs
-	local mobile = UI.IsMobile()
-	local bh = mobile and 58 or 44
+	local bh = mobile and 56 or 44
 	local barW = mobile and 440 or 470
 	local bar = UI.Frame(gui, UDim2.fromOffset(barW, bh + 16), UDim2.new(0.5, -barW / 2, 1, -(bh + 16) - 12), UI.Colors.Bg, "Bar")
 	bar.BackgroundTransparency = 0.1
