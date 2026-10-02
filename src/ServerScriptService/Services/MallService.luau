@@ -196,28 +196,91 @@ local function buildRailings(parent, o, y)
 	end
 end
 
+-- Samples the top surface of a model along its centre line (ground-relative heights), one per stud of z.
+local function treadProfile(m, x, y, z0, z1)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { m }
+	local pts = {}
+	local step = z1 > z0 and 1 or -1
+	for z = z0, z1, step do
+		local hit = workspace:Raycast(Vector3.new(x, y + 40, z), Vector3.new(0, -60, 0), params)
+		if hit then
+			table.insert(pts, Vector3.new(x, hit.Position.Y, z))
+		end
+	end
+	return pts
+end
+
 local function buildEscalator(parent, o, y, ex)
 	local bottomZ, topZ = MallService.ESCALATOR_BOTTOM_Z, MallService.ESCALATOR_TOP_Z
 	local dz = bottomZ - topZ
-	local len = math.sqrt(dz ^ 2 + H ^ 2)
-	local ang = math.atan2(H, dz)
-	local centre = CFrame.new(o.X + ex, y + H / 2, o.Z + (bottomZ + topZ) / 2) * CFrame.Angles(ang, 0, 0)
-	local ramp = part(parent, Vector3.new(6, 0.6, len + 1), centre, C.Dark, Enum.Material.DiamondPlate, "EscalatorRamp")
-	ramp.Transparency = 1
-	ramp.CanQuery = false
-	-- decorative asset centred on the ramp footprint (pivot = bottom centre of its bbox)
+	local cx, cz = o.X + ex, o.Z + (bottomZ + topZ) / 2
+	local imported = AssetRegistry.HasImported("Escalator")
+	-- decorative asset centred on the ramp footprint (pivot = bottom centre of its bbox);
 	-- the generated escalator mesh rises toward -Z: turn it so its low end is at bottomZ
-	local m = AssetRegistry.Place("Escalator", CFrame.new(o.X + ex, y, o.Z + (bottomZ + topZ) / 2), parent, AssetRegistry.HasImported("Escalator") and 180 or 0)
+	local m = AssetRegistry.Place("Escalator", CFrame.new(cx, y, cz), parent, imported and 180 or 0)
+	local surface -- list of points (world) the walking surface follows, bottom to top
+	if imported and m.PrimaryPart then
+		local mp = m.PrimaryPart
+		mp.CanQuery = true
+		local pts = treadProfile(m, cx, y, o.Z + bottomZ - 1, o.Z + topZ + 1)
+		local top = 0
+		for _, p in ipairs(pts) do
+			top = math.max(top, p.Y - y)
+		end
+		if top > 1 and math.abs(top - H) > 0.2 then
+			-- stretch the mesh vertically so its top step meets the upper floor, then measure again
+			local pivot = m:GetPivot()
+			mp.Size = Vector3.new(mp.Size.X, mp.Size.Y * H / top, mp.Size.Z)
+			mp.PivotOffset = CFrame.new(0, -mp.Size.Y / 2, 0) * (mp.PivotOffset - mp.PivotOffset.Position)
+			m:PivotTo(pivot)
+			pts = treadProfile(m, cx, y, o.Z + bottomZ - 1, o.Z + topZ + 1)
+		end
+		if #pts >= 4 then
+			surface = { Vector3.new(cx, y, o.Z + bottomZ + 1) }
+			for _, p in ipairs(pts) do
+				table.insert(surface, Vector3.new(cx, math.min(p.Y, y + H), p.Z))
+			end
+			table.insert(surface, Vector3.new(cx, y + H, o.Z + topZ - 0.5))
+		end
+		mp.CanQuery = false
+	end
 	for _, d in ipairs(m:GetDescendants()) do
 		if d:IsA("BasePart") then
 			d.CanCollide = false
 		end
 	end
-	-- side balustrade walls so players cannot walk off the ramp sideways
+	if surface then
+		-- invisible walking surface that follows the mesh steps: one thin slab per sampled segment
+		for i = 1, #surface - 1 do
+			local a, b = surface[i], surface[i + 1]
+			local seg = (b - a).Magnitude
+			if seg > 0.05 then
+				local cf = CFrame.lookAt((a + b) / 2, b) * CFrame.new(0, -0.3, 0)
+				local slab = part(parent, Vector3.new(6, 0.6, seg + 0.15), cf, C.Dark, nil, "EscalatorRamp")
+				slab.Transparency = 1
+				slab.CanQuery = false
+			end
+		end
+	else
+		local len = math.sqrt(dz ^ 2 + H ^ 2)
+		local ang = math.atan2(H, dz)
+		local centre = CFrame.new(cx, y + H / 2, cz) * CFrame.Angles(ang, 0, 0)
+		local ramp = part(parent, Vector3.new(6, 0.6, len + 1), centre, C.Dark, Enum.Material.DiamondPlate, "EscalatorRamp")
+		ramp.Transparency = 1
+		ramp.CanQuery = false
+	end
+	-- side walls so players cannot walk off the escalator sideways (glass only on the code-built version)
+	local len = math.sqrt(dz ^ 2 + H ^ 2)
+	local ang = math.atan2(H, dz)
+	local centre = CFrame.new(cx, y + H / 2, cz) * CFrame.Angles(ang, 0, 0)
 	for _, sx in ipairs({ -3.2, 3.2 }) do
 		local w = part(parent, Vector3.new(0.3, 3.5, len), centre * CFrame.new(sx, 1.8, 0), C.Teal, nil, "Balustrade")
-		-- the imported escalator mesh has its own sides: keep the wall for collision only
-		w.Transparency = AssetRegistry.HasImported("Escalator") and 1 or 0.5
+		w.Transparency = imported and 1 or 0.5
+		if imported then
+			w.Size = Vector3.new(0.3, 6, len)
+		end
 	end
 end
 
