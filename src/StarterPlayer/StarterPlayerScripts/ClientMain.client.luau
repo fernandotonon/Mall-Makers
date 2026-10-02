@@ -1,6 +1,6 @@
 -- Client bootstrap: builds the HUD, panel, minigame UI and effects.
 local controllers = script.Parent:WaitForChild("Controllers")
-local ORDER = { "EffectsController", "HUDController", "PanelController", "MinigameController", "TutorialController" }
+local ORDER = { "EffectsController", "HUDController", "PanelController", "MinigameController", "TutorialController", "CameraController" }
 local loaded = {}
 for _, name in ipairs(ORDER) do
 	loaded[name] = require(controllers:WaitForChild(name))
