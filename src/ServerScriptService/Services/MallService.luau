@@ -12,6 +12,7 @@
 ]]
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local PhysicsService = game:GetService("PhysicsService")
 
 local Malls = require(ReplicatedStorage.Config.Malls)
 local AssetRegistry = require(ReplicatedStorage.Shared.AssetRegistry)
@@ -248,7 +249,15 @@ local function buildEscalator(parent, o, y, ex)
 	end
 	for _, d in ipairs(m:GetDescendants()) do
 		if d:IsA("BasePart") then
-			d.CanCollide = false
+			if surface then
+				-- the camera only stops at collidable parts: collide in a group nothing else touches,
+				-- so the camera cannot pass through the escalator while people walk on the invisible surface
+				d.CanCollide = true
+				d.CanQuery = true
+				d.CollisionGroup = "CameraOnly"
+			else
+				d.CanCollide = false
+			end
 		end
 	end
 	if surface then
@@ -460,6 +469,13 @@ end
 
 function MallService.Init(services)
 	S = services
+	pcall(function()
+		PhysicsService:RegisterCollisionGroup("CameraOnly")
+		for _, g in ipairs({ "Default", "NPC", "Players", "CameraOnly" }) do
+			pcall(PhysicsService.RegisterCollisionGroup, PhysicsService, g)
+			PhysicsService:CollisionGroupSetCollidable("CameraOnly", g, false)
+		end
+	end)
 	local mallsFolder = Workspace:FindFirstChild("Malls")
 	if mallsFolder then
 		mallsFolder:Destroy()
