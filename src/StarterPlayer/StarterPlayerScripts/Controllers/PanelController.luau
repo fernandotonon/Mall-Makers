@@ -306,39 +306,48 @@ local function render()
 end
 
 function Panel.Open(tab)
-	if root.Visible and currentTab == tab then
+	if root.Visible and (currentTab == tab or tab == "Business") then
 		Panel.Close()
 		return
 	end
 	currentTab = tab
 	root.Visible = true
+	if HUD.SetPanelOpen then
+		HUD.SetPanelOpen(true)
+	end
 	render()
 end
 
 function Panel.Close()
 	root.Visible = false
+	if HUD.SetPanelOpen then
+		HUD.SetPanelOpen(false)
+	end
 end
 
 local function build()
 	gui = Instance.new("ScreenGui")
 	gui.Name = "ShoprisePanel"
 	gui.ResetOnSpawn = false
+	gui.IgnoreGuiInset = true -- use the whole screen; the header leaves room for Roblox's own top-left menu icon
 	gui.DisplayOrder = 5
 	gui.Parent = player:WaitForChild("PlayerGui")
+	local mobile = UI.IsMobile()
+	-- phones: no UIScale (the panel fills the screen at native size, text 12-16 px); desktop scales with the viewport
 	local scale = Instance.new("UIScale")
-	scale.Scale = UI.Scale()
+	scale.Scale = mobile and 1 or UI.Scale()
 	scale.Parent = gui
 	workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-		scale.Scale = UI.Scale()
+		scale.Scale = mobile and 1 or UI.Scale()
 	end)
-	local mobile = UI.IsMobile()
-	root = UI.Frame(gui, mobile and UDim2.new(1, -16, 1, -150) or UDim2.fromOffset(680, 520), mobile and UDim2.fromOffset(8, 70) or UDim2.new(0.5, -340, 0.5, -270), UI.Colors.Bg, "Panel")
+	-- phones: the whole screen; desktop: a large centred window (UIScale keeps it inside small viewports)
+	root = UI.Frame(gui, mobile and UDim2.new(1, -12, 1, -12) or UDim2.fromOffset(900, 640), mobile and UDim2.fromOffset(6, 6) or UDim2.new(0.5, -450, 0.5, -320), UI.Colors.Bg, "Panel")
 	root.BackgroundTransparency = 0.04
 	root.Visible = false
 	UI.Corner(root, 16)
 	local header = UI.Frame(root, UDim2.new(1, 0, 0, 44), nil, UI.Colors.Bg)
 	header.BackgroundTransparency = 1
-	titleLabel = UI.Label(header, "Business", UDim2.new(1, -60, 1, 0), { Pos = UDim2.fromOffset(16, 0), Font = Enum.Font.GothamBlack, TextSize = 20 })
+	titleLabel = UI.Label(header, "Business", UDim2.new(1, -120, 1, 0), { Pos = UDim2.fromOffset(mobile and 56 or 16, 0), Font = Enum.Font.GothamBlack, TextSize = 20 })
 	UI.Button(header, "X", UDim2.fromOffset(36, 32), UI.Colors.Card2, Panel.Close, { Pos = UDim2.new(1, -44, 0, 6), Name = "Close" })
 	local tabBar = UI.Frame(root, UDim2.new(1, -24, 0, 36), UDim2.fromOffset(12, 46), UI.Colors.Bg)
 	tabBar.BackgroundTransparency = 1

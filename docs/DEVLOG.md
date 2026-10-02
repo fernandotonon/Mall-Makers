@@ -2,6 +2,10 @@
 
 ## 2026-10-02 — Empty shelves and the first-store tutorial
 
+- Menu: the expandable tab bar is gone. One Menu button opens the panel (Business tab) and hides
+  itself; closing the panel brings it back. The panel fills the phone screen (IgnoreGuiInset, no
+  UIScale on phones) and is 900x640 on desktop. The tutorial billboard is smaller on phones.
+
 - Customers who find an empty shelf now walk to another shelf that has stock; if every shelf is empty
   they wait at the shelf (orange "🥛?" bubble) for up to their patience and take products as soon as a
   restock lands, on whichever shelf was filled. Verified: waiting customer -> restock on the other

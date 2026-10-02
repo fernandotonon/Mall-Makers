@@ -53,47 +53,32 @@ local function build()
 	objectiveLabel = UI.Label(obj, "…", UDim2.new(1, -12, 1, -16), { Pos = UDim2.fromOffset(8, 14), Font = Enum.Font.GothamBold, TextSize = mobile and 12 or 14, VAlign = Enum.TextYAlignment.Top })
 	saveLabel = UI.Label(gui, "", UDim2.fromOffset(objW, 14), { Pos = UDim2.new(1, -objW - 6, 0, objH + 8), TextSize = 10, Color = UI.Colors.Warn, Align = Enum.TextXAlignment.Right })
 
-	-- bottom bar: collapsed to a single menu button by default; tap it to expand the four tabs
-	local bh = mobile and 56 or 44
-	local barW = mobile and 440 or 470
-	local bar = UI.Frame(gui, UDim2.fromOffset(barW, bh + 16), UDim2.new(0.5, -barW / 2, 1, -(bh + 16) - 12), UI.Colors.Bg, "Bar")
-	bar.BackgroundTransparency = 0.1
-	bar.Visible = false
-	UI.Corner(bar, 16)
-	UI.Pad(bar, 8)
-	UI.List(bar, 8, true)
-	local tabs = { { "Business", "💼" }, { "Stores", "🏬" }, { "Workers", "🧑‍💼" }, { "Mall", "🏢" } }
-	for i, t in ipairs(tabs) do
-		UI.Button(bar, (mobile and "" or t[2] .. " ") .. t[1], UDim2.new(0.22, -6, 1, 0), UI.Colors.Card2, function()
-			HUD.OnOpenPanel:Fire(t[1])
-		end, { Order = i, TextSize = 15, Name = "Tab_" .. t[1] })
-	end
-	local collapse = UI.Button(bar, "X", UDim2.new(0.12, -6, 1, 0), UI.Colors.Card, nil, { Order = 9, TextSize = 18, Name = "Collapse" })
-	local menuW = mobile and 76 or 96
-	local menuButton = UI.Button(gui, "📋 Menu", UDim2.fromOffset(menuW, bh + 4), UI.Colors.Bg, nil, { Pos = UDim2.new(0.5, -menuW / 2, 1, -(bh + 4) - 12), TextSize = 16, Name = "Menu", Radius = 16 })
+	-- one Menu button at the bottom; it opens the panel directly and hides while the panel is open
+	local bh = mobile and 50 or 44
+	local menuW = mobile and 110 or 120
+	local menuButton = UI.Button(gui, "📋 Menu", UDim2.fromOffset(menuW, bh), UI.Colors.Bg, function()
+		HUD.OnOpenPanel:Fire("Business")
+	end, { Pos = UDim2.new(0.5, -menuW / 2, 1, -bh - 10), TextSize = 16, Name = "Menu", Radius = 16 })
 	menuButton.BackgroundTransparency = 0.1
-	local function setExpanded(expanded)
-		bar.Visible = expanded
-		menuButton.Visible = not expanded
+	function HUD.SetPanelOpen(open)
+		menuButton.Visible = not open
+		-- on phones the panel is full screen: hide the cards behind it
+		if mobile then
+			cash.Visible = not open
+			obj.Visible = not open
+			saveLabel.Visible = not open
+		end
 	end
-	menuButton.Activated:Connect(function()
-		setExpanded(true)
-	end)
-	collapse.Activated:Connect(function()
-		setExpanded(false)
-	end)
-	HUD.SetMenuExpanded = setExpanded
 
-	-- drop button (visible while carrying something); sits left of the bottom bar, clear of the touch controls
-	local barHalf = barW / 2
-	local dropW = mobile and 120 or 130
-	dropButton = UI.Button(gui, mobile and "📦 Drop" or "📦 Drop (Q)", UDim2.fromOffset(dropW, bh + 16), UI.Colors.Coral, function()
+	-- drop button (visible while carrying something); sits left of the Menu button, clear of the touch controls
+	local dropW = mobile and 110 or 130
+	dropButton = UI.Button(gui, mobile and "📦 Drop" or "📦 Drop (Q)", UDim2.fromOffset(dropW, bh), UI.Colors.Coral, function()
 		Remotes.Action:FireServer("DropCarry")
-	end, { Pos = UDim2.new(0.5, -(barHalf + 10 + dropW), 1, -(bh + 16) - 12), TextSize = 16, Name = "Drop", Radius = 16 })
+	end, { Pos = UDim2.new(0.5, -menuW / 2 - 10 - dropW, 1, -bh - 10), TextSize = 16, Name = "Drop", Radius = 16 })
 	dropButton.Visible = false
 
 	-- toasts
-	toastHolder = UI.Frame(gui, UDim2.fromOffset(420, 200), UDim2.new(0.5, -210, 1, -(bh + 16) - 12 - 210), Color3.new(), "Toasts")
+	toastHolder = UI.Frame(gui, UDim2.fromOffset(420, 200), UDim2.new(0.5, -210, 1, -bh - 10 - 210), Color3.new(), "Toasts")
 	toastHolder.BackgroundTransparency = 1
 	local l = UI.List(toastHolder, 6)
 	l.VerticalAlignment = Enum.VerticalAlignment.Bottom
@@ -101,7 +86,7 @@ local function build()
 
 	-- hint (desktop)
 	if not mobile then
-		UI.Label(gui, "B: Business panel   ·   E / R: interact (prompts)   ·   Q: drop   ·   M: Mall tab   ·   Menu button expands the tabs", UDim2.fromOffset(520, 18), { Pos = UDim2.new(0.5, -260, 1, -14), TextSize = 12, Color = UI.Colors.Muted, Align = Enum.TextXAlignment.Center })
+		UI.Label(gui, "B: Business panel   ·   E / R: interact (prompts)   ·   Q: drop   ·   M: Mall tab   ·   Menu opens the panel", UDim2.fromOffset(520, 18), { Pos = UDim2.new(0.5, -260, 1, -14), TextSize = 12, Color = UI.Colors.Muted, Align = Enum.TextXAlignment.Center })
 	end
 end
 

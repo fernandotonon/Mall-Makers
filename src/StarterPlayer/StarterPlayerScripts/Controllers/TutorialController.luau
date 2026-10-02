@@ -33,12 +33,12 @@ local function build()
 	anchor.CanQuery = false
 	anchor.CanTouch = false
 	bb = Instance.new("BillboardGui")
-	bb.Size = UDim2.fromOffset(220, 110)
+	bb.Size = mobile and UDim2.fromOffset(150, 74) or UDim2.fromOffset(220, 110) -- pixel sizes do not scale with UIScale
 	bb.AlwaysOnTop = false -- rendered in the world (AlwaysOnTop billboards also do not show in Studio captures)
 	bb.MaxDistance = 400
 	bb.StudsOffset = Vector3.new(0, 0, 0)
 	textLabel = Instance.new("TextLabel")
-	textLabel.Size = UDim2.new(1, 0, 0, 34)
+	textLabel.Size = UDim2.new(1, 0, 0, mobile and 24 or 34)
 	textLabel.BackgroundColor3 = UI.Colors.Coral
 	textLabel.BorderSizePixel = 0
 	textLabel.Font = Enum.Font.GothamBold
@@ -54,8 +54,8 @@ local function build()
 	pad.Parent = textLabel
 	textLabel.Parent = bb
 	arrowLabel = Instance.new("TextLabel")
-	arrowLabel.Size = UDim2.new(1, 0, 0, 70)
-	arrowLabel.Position = UDim2.fromOffset(0, 36)
+	arrowLabel.Size = UDim2.new(1, 0, 0, mobile and 46 or 70)
+	arrowLabel.Position = UDim2.fromOffset(0, mobile and 26 or 36)
 	arrowLabel.BackgroundTransparency = 1
 	arrowLabel.Font = Enum.Font.GothamBlack
 	arrowLabel.TextScaled = true
