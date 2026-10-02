@@ -158,7 +158,7 @@ tabs.Workers = function(state)
 	local c = card(content, 1)
 	UI.Label(c, ("Staff in %s"):format(mall.Name), UDim2.new(1, 0, 0, 24), { Font = Enum.Font.GothamBold, TextSize = 17, Order = 1 })
 	if #mall.Workers == 0 then
-		UI.Label(c, "No workers yet. Explore your floor: a courier lost a delivery, the staff room has no power, and new shops offer trials.", UDim2.new(1, 0, 0, 40), { TextSize = 13, Color = UI.Colors.Muted, Order = 2 })
+		UI.Label(c, "No workers yet. Explore your floor: a courier lost a delivery, the staff room has no power, and the food kiosk offers a trial. Buy the self-checkout kiosk to free your cashier for the clothing shop.", UDim2.new(1, 0, 0, 40), { TextSize = 13, Color = UI.Colors.Muted, Order = 2 })
 	end
 	for i, w in ipairs(mall.Workers) do
 		total += w.Wage

@@ -1,5 +1,14 @@
 # Development log — Shoprise
 
+## 2026-10-02 — Self-checkout kiosk
+
+- Convenience store upgrade "Self-checkout kiosk" ($550): an InfoKiosk beside the counter serves the
+  first free queued customer (within the first two, so a cashier can work in parallel) every 6 s
+  (`Stores.Convenience.SelfCheckoutSeconds`); sales by the kiosk count for the ledger but not for
+  worker tasks or assist bonuses; inactive-floor simulation treats it as a seller. The idea: it frees
+  the single Mall-1 cashier to be moved to the Clothing shop (Workers tab ▸ Move). A second cashier
+  trial at the boutique was considered and dropped at the user's request.
+
 ## 2026-10-02 — Partial boxes
 
 - A box is no longer consumed whole. Restocking puts only what fits on the shelf; the rest stays in

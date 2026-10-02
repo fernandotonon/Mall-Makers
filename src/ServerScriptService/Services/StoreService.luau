@@ -110,7 +110,8 @@ local function refreshPrompts(st)
 		local c = st.Queue[1]
 		local active = c ~= nil and (c.State == "Queued" or c.State == "Waiting") and not c.Busy
 		if st.Cfg.Interaction == "Restock" then
-			st.Counter.Prompt.Enabled = active
+			local c2 = st.Queue[2]
+			st.Counter.Prompt.Enabled = active or (c2 ~= nil and c2.State == "Queued" and not c2.Busy)
 		elseif st.Cfg.Interaction ~= "Match" then
 			st.Counter.Prompt.Enabled = active and c.State == "Waiting"
 		end
@@ -465,11 +466,45 @@ function StoreService.QueueSpot(st, index)
 end
 
 function StoreService.NextQueued(st)
-	local c = st.Queue[1]
-	if c and c.State == "Queued" and not c.Busy then
-		return c
+	for i = 1, math.min(2, #st.Queue) do
+		local c = st.Queue[i]
+		if c and c.State == "Queued" and not c.Busy then
+			return c
+		end
 	end
 	return nil
+end
+
+-- Self-checkout kiosk: takes the first free queued customer (within the first two, so it works
+-- alongside a cashier) and completes the sale after SelfCheckoutSeconds. Called from the store tick.
+function StoreService.KioskTick(st)
+	local k = st.Kiosk
+	if not k or k.Current or os.clock() < k.NextAt then
+		return
+	end
+	for i = 1, math.min(2, #st.Queue) do
+		local c = st.Queue[i]
+		if c and c.State == "Queued" and not c.Busy then
+			c.Busy = k
+			k.Current = c
+			S.NpcService.SetBubble(c.Npc, "🧾")
+			task.delay(st.Cfg.SelfCheckoutSeconds or 6, function()
+				k.Current = nil
+				k.NextAt = os.clock() + 1
+				if stores[st.Key] ~= st or c.State ~= "Queued" or c.Busy ~= k then
+					if c.Busy == k then
+						c.Busy = nil
+					end
+					return
+				end
+				StoreService.CompleteSale(st, c, "Kiosk", c.Items or 1, 0)
+				c.State = "Served"
+				c.Busy = nil
+				StoreService.LeaveQueue(st, c)
+			end)
+			return
+		end
+	end
 end
 
 -- serve the first queued customer (counter stores: Convenience; also used by cashiers)
@@ -1038,6 +1073,11 @@ local function buildInterior(st)
 		end
 		addPallet(st, 12, 8)
 		placeLocal(st, "Basket", -14, 10, 0)
+		if StoreService.HasUpgrade(st, "SelfCheckout") then
+			local kiosk = placeLocal(st, "InfoKiosk", -2, 7, 180)
+			local part = anchorOf(kiosk)
+			st.Kiosk = { Part = part, NextAt = 0, Label = label(part, "🧾 Self-checkout", 8, UDim2.fromOffset(170, 34)) }
+		end
 	elseif t == "Clothing" then
 		addDisplay(st, "ClothesRack", 0, -7)
 		if StoreService.HasUpgrade(st, "Display") then
@@ -1536,6 +1576,9 @@ local function simulateTick()
 	for _, st in pairs(stores) do
 		if not S.FloorService.IsFloorActive(st.MallId, st.Floor) then
 			local worker = S.WorkerService and S.WorkerService.SellerFor(st)
+			if not worker and st.Kiosk then
+				worker = "Kiosk"
+			end
 			if worker then
 				local perCustomer = (st.Cfg.ItemsPerCustomer[1] + st.Cfg.ItemsPerCustomer[2]) / 2
 				local customers = dt / Economy.Customers.SpawnIntervalSeconds * Economy.Simulation.InactiveSaleRate
@@ -1634,6 +1677,7 @@ function StoreService.Start()
 			for _, st in pairs(stores) do
 				if S.FloorService.IsFloorActive(st.MallId, st.Floor) then
 					pcall(refreshPrompts, st)
+					pcall(StoreService.KioskTick, st)
 				end
 			end
 		end

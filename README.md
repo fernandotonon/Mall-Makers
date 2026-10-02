@@ -114,7 +114,7 @@ All interactions are ProximityPrompts or big icon buttons: no typing, no aiming.
   Shopping rushes every 5 minutes. NPC counts are capped per store and per server.
 - **Economy**: one cash currency; revenue, stock cost, wages and net profit per store in the Business
   panel; readable abbreviations ($1.2K, $2.5M). Stock boxes cost `BoxUnits × UnitCost` and arrive at the
-  delivery point after a few seconds. Upgrades (extra shelf, bigger boxes, decor, second display…).
+  delivery point after a few seconds. Upgrades (extra shelf, bigger boxes, decor, self-checkout kiosk, second display…).
 - **Workers**: discovered on your floor, not bought from a menu: return a courier's lost box (Stocker),
   restart the dark staff room's generator (Cashier), pass a 3-order trial at the kiosk (Cook); downtown:
   a technician's lost parts box and a powerless management office (Manager). Each shows wage and benefit

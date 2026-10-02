@@ -26,7 +26,9 @@ return {
 			{ Id = "ExtraShelf", Name = "Extra shelf", Cost = 220, Desc = "+1 shelf: more stock on display, more customers browse at once." },
 			{ Id = "BiggerBoxes", Name = "Bigger boxes", Cost = 350, Desc = "Each delivery box holds 12 units instead of 8." },
 			{ Id = "Decor", Name = "Nice decor", Cost = 300, Desc = "Customers wait longer and pay a little more." },
+			{ Id = "SelfCheckout", Name = "Self-checkout kiosk", Cost = 550, Desc = "Customers pay by themselves (one every 6 s), even when nobody is at the counter. Frees your cashier for another store." },
 		},
+		SelfCheckoutSeconds = 6,
 		Workers = { "Cashier", "Stocker" },
 	},
 	Clothing = {
