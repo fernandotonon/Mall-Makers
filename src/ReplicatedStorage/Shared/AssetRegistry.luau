@@ -351,7 +351,14 @@ end
 
 local assetsFolder = ReplicatedStorage:FindFirstChild("Assets")
 
+-- Imported meshes that are not usable yet: the code-built version is used instead.
+-- Storefront: the generated facade has a solid back wall that closes the store entrance.
+AssetRegistry.PREFER_PROCEDURAL = { Storefront = true }
+
 local function findImported(id)
+	if AssetRegistry.PREFER_PROCEDURAL[id] then
+		return nil
+	end
 	if not assetsFolder then
 		assetsFolder = ReplicatedStorage:FindFirstChild("Assets")
 		if not assetsFolder then

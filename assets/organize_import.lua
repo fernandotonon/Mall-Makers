@@ -5,14 +5,29 @@
 -- bottom centre (the AssetRegistry contract). Returns a report string.
 local IMPORT_NAME = IMPORT_NAME or "Shoprise_assets"
 local RS = game:GetService("ReplicatedStorage")
-local AssetRegistry = require(RS.Shared.AssetRegistry)
-local SIZES = AssetRegistry.SIZES
+-- the Studio Assistant context may not be allowed to require game modules: fall back to parsing the source
+local SIZES
+local okReq, reg = pcall(require, RS.Shared.AssetRegistry)
+if okReq and reg.SIZES then
+	SIZES = reg.SIZES
+else
+	SIZES = {}
+	local src = RS.Shared.AssetRegistry.Source
+	local block = src:match("AssetRegistry%.SIZES%s*=%s*(%b{})")
+	for id, x, y, z in (block or ""):gmatch("(%w+)%s*=%s*Vector3%.new%(([%d%.]+),%s*([%d%.]+),%s*([%d%.]+)%)") do
+		SIZES[id] = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
+	end
+end
 local assets = RS:FindFirstChild("Assets") or Instance.new("Folder")
 assets.Name = "Assets"
 assets.Parent = RS
 local import = workspace:FindFirstChild(IMPORT_NAME)
 assert(import, "import model not found: " .. IMPORT_NAME)
 local report = {}
+-- building pieces must fill their slot exactly (walls, floor-to-floor escalator); props keep proportions
+-- extra turn (degrees) for meshes whose front does not face -Z after the import
+local YAW_FIX = { Shelf = 180 }
+local FIT_EXACT = { Storefront = true, ShutterDoor = true, Railing = true, Elevator = true, Escalator = true, Shelf = true, Barricade = true }
 local function meshOf(inst)
 	if inst:IsA("MeshPart") then return inst end
 	return inst:FindFirstChildWhichIsA("MeshPart", true)
@@ -32,7 +47,11 @@ for _, child in ipairs(import:GetChildren()) do
 		-- footprint orientation: if the target is longer along X but the mesh along Z, turn it 90 degrees
 		local yaw = 0
 		if ((target.X > target.Z) ~= (mp.Size.X > mp.Size.Z)) and math.abs(target.X - target.Z) > 0.5 then yaw = math.rad(90) end
-		mp.PivotOffset = CFrame.new(0, -mp.Size.Y / 2, 0) * CFrame.Angles(0, yaw, 0)
+		if FIT_EXACT[id] then
+			mp.Size = yaw ~= 0 and Vector3.new(target.Z, target.Y, target.X) or target
+		end
+		-- PivotOffset holds the inverse turn, so subtracting YAW_FIX turns the model by +YAW_FIX when pivoted
+		mp.PivotOffset = CFrame.new(0, -mp.Size.Y / 2, 0) * CFrame.Angles(0, yaw - math.rad(YAW_FIX[id] or 0), 0)
 		local existing = assets:FindFirstChild(id, true)
 		if existing then existing:Destroy() end
 		local m = Instance.new("Model")

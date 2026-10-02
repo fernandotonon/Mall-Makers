@@ -215,7 +215,8 @@ local function buildEscalator(parent, o, y, ex)
 	-- side balustrade walls so players cannot walk off the ramp sideways
 	for _, sx in ipairs({ -3.2, 3.2 }) do
 		local w = part(parent, Vector3.new(0.3, 3.5, len), centre * CFrame.new(sx, 1.8, 0), C.Teal, nil, "Balustrade")
-		w.Transparency = 0.5
+		-- the imported escalator mesh has its own sides: keep the wall for collision only
+		w.Transparency = AssetRegistry.HasImported("Escalator") and 1 or 0.5
 	end
 end
 

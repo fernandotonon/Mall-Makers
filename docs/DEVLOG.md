@@ -1,5 +1,21 @@
 # Development log — Shoprise
 
+## 2026-10-02 — Generated meshes in the game
+
+- Batch complete (30/30 TRELLIS.2 + BiRefNet matte; Shelf at res 512). postprocess.py + combine.py ->
+  `assets/processed/Shoprise_assets.glb` (88 MB, gitignored); imported in Studio by the user;
+  `organize_import.lua` (now works without requiring game modules) put them in ReplicatedStorage.Assets;
+  `extract_assets.luau` -> `assets/roblox/Assets.rbxm` (30 assets, ~0.5 MB; meshes are uploaded
+  rbxassetids owned by the user's account).
+- Sizing: props keep their proportions (longest side = SIZES); building pieces that must fill their
+  slot (Storefront, ShutterDoor, Railing, Elevator, Escalator, Shelf, Barricade) are fitted per axis.
+  Shelf needed a 180° turn (`YAW_FIX` in organize_import.lua).
+- `AssetRegistry.PREFER_PROCEDURAL = { Storefront = true }`: the generated storefront has a solid back
+  wall that closes the store; the code-built one stays until the mesh gets an opening.
+- Escalator glass balustrades are invisible (collision only) when the escalator mesh is used.
+- Known for the user's mesh pass: trash cans (and a few props) carry a flat square base plate; shelf
+  product cartons sit inside the shelf mesh (positions come from the old procedural layout).
+
 ## 2026-10-02 — Self-checkout kiosk
 
 - Convenience store upgrade "Self-checkout kiosk" ($550): an InfoKiosk beside the counter serves the
