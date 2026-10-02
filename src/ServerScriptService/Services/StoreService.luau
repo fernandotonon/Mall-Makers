@@ -1092,11 +1092,21 @@ local function buildInterior(st)
 	elseif t == "FoodKiosk" then
 		local kiosk = placeLocal(st, "FoodKiosk", 0, -2, 180)
 		st.Stations.Kiosk = anchorOf(kiosk)
-		st.Stations.Griddle = anchorOf(placeLocal(st, "Griddle", -3, -3, 180))
-		st.Stations.Drinks = anchorOf(placeLocal(st, "DrinkDispenser", 3, -3, 180))
-		placeLocal(st, "BurgerTray", -3, 1, 0)
+		-- cooking stations in a back row behind the booth (the booth mesh fills x -6..6, z -6..2)
+		st.Stations.Griddle = anchorOf(placeLocal(st, "Griddle", -5, -10, 180))
+		st.Stations.Drinks = anchorOf(placeLocal(st, "DrinkDispenser", 7, -10, 180))
 		if StoreService.HasUpgrade(st, "SecondGriddle") then
-			placeLocal(st, "Griddle", -8, -3, 180)
+			placeLocal(st, "Griddle", 1, -10, 180)
+		end
+		-- the tray sits on the booth counter: find its top surface
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Include
+		params.FilterDescendantsInstances = { kiosk }
+		local from = (st.Frame * CFrame.new(-3, 5, 1)).Position -- below the canopy
+		local hit = workspace:Raycast(from, Vector3.new(0, -6, 0), params)
+		local tray = placeLocal(st, "BurgerTray", -3, 1, 0)
+		if hit then
+			tray:PivotTo(CFrame.new(hit.Position) * (tray:GetPivot() - tray:GetPivot().Position))
 		end
 		addShelf(st, 1, "Shelf", -13, -8, 90, 0)
 		st.Shelves[1].Spot = (st.Frame * CFrame.new(-9, 0, -8)).Position

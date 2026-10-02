@@ -16,7 +16,11 @@
 - User mesh pass 1: Bench, CafeTable, Chair, Fountain, TrashCan re-exported without the flat base
   plates and swapped in. Storefront: its front faces +Z (YAW_FIX 180 now in organize_import.lua and
   applied to the asset) but the arch opens into a closed alcove, so the procedural storefront stays
-  until the mesh has a through opening. Shelf product cartons still sit inside the shelf mesh.
+  until the mesh has a through opening.
+- Shelf: back to the code-built shelf (`PREFER_PROCEDURAL`), so product cartons sit on its levels.
+- Food kiosk: the booth mesh (12 x 8) swallowed the griddle, drink dispenser and tray. Stations moved
+  to a back row at z=-10 (griddle x=-5, second griddle x=1, drinks x=7); the tray is placed on the
+  booth counter by a raycast from under the canopy.
 
 ## 2026-10-02 — Self-checkout kiosk
 
