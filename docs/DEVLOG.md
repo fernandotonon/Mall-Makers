@@ -13,8 +13,10 @@
 - `AssetRegistry.PREFER_PROCEDURAL = { Storefront = true }`: the generated storefront has a solid back
   wall that closes the store; the code-built one stays until the mesh gets an opening.
 - Escalator glass balustrades are invisible (collision only) when the escalator mesh is used; the mesh rises toward -Z, so it is placed with a 180° turn. Its steps are flat for the first ~5 studs and stopped ~2 studs under the next floor, so at build time the server raycasts the mesh's top surface, stretches it to FLOOR_HEIGHT and builds the invisible walking surface from those samples (one thin slab per stud). Verified: surface matches the mesh within 0.01 stud; a character walks up in ~2 s. Camera: the default camera only stops at collidable parts, and a collidable mesh (even in a collision group that touches nothing) broke the humanoid on the stairs, so the mesh stays non-collidable, is tagged "CameraBlocker", and `CameraController` moves the camera in front of tagged parts after the default camera update.
-- Known for the user's mesh pass: trash cans (and a few props) carry a flat square base plate; shelf
-  product cartons sit inside the shelf mesh (positions come from the old procedural layout).
+- User mesh pass 1: Bench, CafeTable, Chair, Fountain, TrashCan re-exported without the flat base
+  plates and swapped in. Storefront: its front faces +Z (YAW_FIX 180 now in organize_import.lua and
+  applied to the asset) but the arch opens into a closed alcove, so the procedural storefront stays
+  until the mesh has a through opening. Shelf product cartons still sit inside the shelf mesh.
 
 ## 2026-10-02 — Self-checkout kiosk
 

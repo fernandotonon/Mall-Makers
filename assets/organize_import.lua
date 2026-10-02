@@ -26,7 +26,7 @@ assert(import, "import model not found: " .. IMPORT_NAME)
 local report = {}
 -- building pieces must fill their slot exactly (walls, floor-to-floor escalator); props keep proportions
 -- extra turn (degrees) for meshes whose front does not face -Z after the import
-local YAW_FIX = { Shelf = 180 }
+local YAW_FIX = { Shelf = 180, Storefront = 180 }
 local FIT_EXACT = { Storefront = true, ShutterDoor = true, Railing = true, Elevator = true, Escalator = true, Shelf = true, Barricade = true }
 local function meshOf(inst)
 	if inst:IsA("MeshPart") then return inst end
