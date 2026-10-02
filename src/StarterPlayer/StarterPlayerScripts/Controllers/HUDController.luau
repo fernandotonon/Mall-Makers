@@ -86,7 +86,7 @@ local function build()
 
 	-- hint (desktop)
 	if not mobile then
-		UI.Label(gui, "B: Business panel   ·   E / R: interact (prompts)   ·   Q: drop   ·   M: Mall tab   ·   Menu opens the panel", UDim2.fromOffset(520, 18), { Pos = UDim2.new(0.5, -260, 1, -14), TextSize = 12, Color = UI.Colors.Muted, Align = Enum.TextXAlignment.Center })
+		UI.Label(gui, "B: Business panel   ·   E / R: interact (prompts)   ·   Q: drop (beside the pallet = put back)   ·   M: Mall tab   ·   Menu opens the panel", UDim2.fromOffset(520, 18), { Pos = UDim2.new(0.5, -260, 1, -14), TextSize = 12, Color = UI.Colors.Muted, Align = Enum.TextXAlignment.Center })
 	end
 end
 

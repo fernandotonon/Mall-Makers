@@ -163,7 +163,7 @@ local function tutorialState(player, profile)
 	local step
 	if carrying == "StockBox" then
 		step = "Restock"
-	elseif st.Pallet.Boxes > 0 then
+	elseif st.Pallet.Boxes > 0 or (st.Pallet.Loose or 0) > 0 then
 		step = "TakeBox"
 	elseif st.Pallet.Pending > 0 then
 		step = "WaitBox"

@@ -243,7 +243,12 @@ local function runWorker(rt)
 					end
 					if source then
 						S.NpcService.MoveTo(npc, source, 10)
-						if ok() and takeFn() then
+						local okTake, unitsInBox
+						if ok() then
+							okTake, unitsInBox = takeFn()
+						end
+						if okTake then
+							local units = unitsInBox or S.StoreService.BoxUnits(st)
 							local box = AssetRegistry.Place("StockBox", npc.PrimaryPart.CFrame * CFrame.new(0, -0.5, -1.6), npc, 0)
 							for _, d in ipairs(box:GetDescendants()) do
 								if d:IsA("BasePart") then
@@ -256,12 +261,30 @@ local function runWorker(rt)
 									weld.Parent = d
 								end
 							end
-							S.NpcService.MoveTo(npc, shelf.Spot, 10)
-							S.NpcService.Face(npc, shelf.Part.Position)
-							local done = work(cfg.RestockSeconds or 6, ICON.Box)
+							-- fill this shelf, then any other shelf with room, with what the box holds
+							local target = shelf
+							while target and units > 0 and ok() do
+								S.NpcService.MoveTo(npc, target.Spot, 10)
+								S.NpcService.Face(npc, target.Part.Position)
+								if not work(cfg.RestockSeconds or 6, ICON.Box) then
+									break
+								end
+								local _, left = S.StoreService.RestockShelf(st, target, units, w)
+								units = left
+								target = units > 0 and S.StoreService.ShelfNeedingStock(st) or nil
+							end
 							box:Destroy()
-							if done then
-								S.StoreService.RestockShelf(st, shelf, S.StoreService.BoxUnits(st), w)
+							if units > 0 and ok() then
+								-- leftovers go back as a partial box (pallet) or stay as shelf-ready stock (stockroom boxes)
+								if st.Pallet then
+									S.NpcService.MoveTo(npc, source, 10)
+									S.StoreService.ReturnUnitsToPallet(st, units)
+								else
+									local sh = S.StoreService.ShelfNeedingStock(st)
+									if sh then
+										S.StoreService.RestockShelf(st, sh, units, nil)
+									end
+								end
 							end
 						end
 						did = true

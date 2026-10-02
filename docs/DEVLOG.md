@@ -1,5 +1,13 @@
 # Development log — Shoprise
 
+## 2026-10-02 — Partial boxes
+
+- A box is no longer consumed whole. Restocking puts only what fits on the shelf; the rest stays in
+  the carried box ("Restocked 1 Groceries (7 left in the box)"), which can go to another shelf of the
+  same store. Dropping the box beside its pallet puts the units back as a partial box ("+ 4 loose");
+  Take box hands out the partial box first. Stockers fill the target shelf, carry leftovers to the next
+  shelf with room, and return any remainder to the pallet. Verified in play with a sale trace.
+
 ## 2026-10-02 — Empty shelves and the first-store tutorial
 
 - Menu: the expandable tab bar is gone. One Menu button opens the panel (Business tab) and hides

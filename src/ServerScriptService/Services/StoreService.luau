@@ -100,8 +100,8 @@ end
 -- store is not covered in balloons. Called from a slow loop and after state changes.
 local function refreshPrompts(st)
 	if st.Pallet then
-		st.Pallet.TakePrompt.Enabled = st.Pallet.Boxes > 0
-		st.Pallet.Label.Parent.Enabled = (st.Pallet.Boxes + st.Pallet.Pending) > 0
+		st.Pallet.TakePrompt.Enabled = st.Pallet.Boxes > 0 or (st.Pallet.Loose or 0) > 0
+		st.Pallet.Label.Parent.Enabled = (st.Pallet.Boxes + st.Pallet.Pending + (st.Pallet.Loose or 0)) > 0
 	end
 	for _, sh in ipairs(st.Shelves) do
 		sh.Prompt.Enabled = sh.Stock < st.Cfg.ShelfCapacity
@@ -268,7 +268,8 @@ local function refreshPallet(st)
 		local col, row = (i - 1) % 2, (i - 1) // 2
 		table.insert(p.Visuals, boxVisual(st.Folder, p.Part.CFrame * CFrame.new(-1.1 + col * 2.2, 0.25, 0) * CFrame.new(0, row * 2.05, 0)))
 	end
-	p.Label.Text = ("%s Boxes: %d%s"):format(ICON.Box, p.Boxes, p.Pending > 0 and (" (+%d arriving)"):format(p.Pending) or "")
+	local loose = p.Loose or 0
+	p.Label.Text = ("%s Boxes: %d%s%s"):format(ICON.Box, p.Boxes, loose > 0 and (" + %d loose"):format(loose) or "", p.Pending > 0 and (" (+%d arriving)"):format(p.Pending) or "")
 	if st.Pallet.TakePrompt then
 		refreshPrompts(st)
 	end
@@ -310,34 +311,56 @@ function StoreService.OrderStock(player, st)
 	return true
 end
 
+-- Takes a box from the pallet: a partly used box (loose units) first, else a full one.
+-- Returns false, or true plus the number of units in the box taken.
 function StoreService.TakeBoxFromPallet(player, st)
 	local p = st.Pallet
-	if not p or p.Boxes <= 0 then
+	local loose = p and (p.Loose or 0) or 0
+	if not p or (p.Boxes <= 0 and loose <= 0) then
 		if player then
 			S.MessageService.Toast(player, "No boxes here. Order stock first.", "info")
 		end
 		return false
 	end
+	local units = loose > 0 and loose or StoreService.BoxUnits(st)
 	if player then
 		if Carry.Get(player) then
 			S.MessageService.Toast(player, "Your hands are full.", "bad")
 			return false
 		end
-		if not Carry.Give(player, "StockBox", { Source = "Pallet", Store = st.Key, Type = st.Type, Units = StoreService.BoxUnits(st) }) then
+		if not Carry.Give(player, "StockBox", { Source = "Pallet", Store = st.Key, Type = st.Type, Units = units }) then
 			return false
 		end
-		S.MessageService.Tip(player, "CarryBox", "Carry the box to a shelf and press Restock.")
+		S.MessageService.Tip(player, "CarryBox", "Carry the box to a shelf and press Restock. Units that do not fit stay in the box.")
 	end
-	p.Boxes -= 1
+	if loose > 0 then
+		p.Loose = 0
+	else
+		p.Boxes -= 1
+	end
 	refreshPallet(st)
 	if player then
 		push(st.Owner)
 	end
-	return true
+	return true, units
+end
+
+-- Puts leftover units back on the pallet as a partial box (merges with an existing one; a full
+-- box's worth becomes a whole box).
+function StoreService.ReturnUnitsToPallet(st, units)
+	local p = st.Pallet
+	if not p or units <= 0 then
+		return
+	end
+	local full = StoreService.BoxUnits(st)
+	local total = (p.Loose or 0) + units
+	p.Boxes += total // full
+	p.Loose = total % full
+	refreshPallet(st)
 end
 
 function StoreService.PalletHasBox(st)
-	return st.Pallet and st.Pallet.Boxes > 0
+	return st.Pallet ~= nil and (st.Pallet.Boxes > 0 or (st.Pallet.Loose or 0) > 0)
 end
 
 function StoreService.ShelfNeedingStock(st)
@@ -357,8 +380,9 @@ function StoreService.RestockShelf(st, shelf, units, by)
 	shelf.Stock += added
 	syncStock(st)
 	local owner = st.Owner
+	local left = units - added
 	if typeof(by) == "Instance" and by:IsA("Player") then
-		S.MessageService.Toast(by, ("Restocked %d %s"):format(added, st.Cfg.Product), "good")
+		S.MessageService.Toast(by, left > 0 and ("Restocked %d %s (%d left in the box)"):format(added, st.Cfg.Product, left) or ("Restocked %d %s"):format(added, st.Cfg.Product), "good")
 		if by ~= owner then
 			S.AssistService.Reward(by, owner, st.Key .. ":restock:" .. shelf.Index, shelf.Part.Position)
 		else
@@ -369,7 +393,7 @@ function StoreService.RestockShelf(st, shelf, units, by)
 	end
 	evaluate(owner)
 	push(owner)
-	return added
+	return added, left
 end
 
 function StoreService.RestockFromCarry(player, st, shelf)
@@ -394,12 +418,25 @@ function StoreService.RestockFromCarry(player, st, shelf)
 		S.MessageService.Toast(player, "That box belongs to another store.", "bad")
 		return
 	end
-	Carry.Take(player, "StockBox")
+	if c.Data.Opened and c.Data.Store ~= st.Key then
+		S.MessageService.Toast(player, "That opened box holds another store's product.", "bad")
+		return
+	end
 	local units = c.Data.Units or StoreService.BoxUnits(st)
-	if st.Mall.Logistics then
+	if st.Mall.Logistics and not c.Data.Opened then
 		units = StoreService.BoxUnits(st) -- generic supplies become this store's product; cost was booked at the dock
 	end
-	StoreService.RestockShelf(st, shelf, units, player)
+	local _, left = StoreService.RestockShelf(st, shelf, units, player)
+	if left > 0 then
+		-- keep carrying the partly used box: it now belongs to this store
+		c.Data.Units = left
+		c.Data.Opened = true
+		c.Data.Store = st.Key
+		c.Data.Type = st.Type
+		c.Data.Source = st.Mall.Logistics and "Stockroom" or "Pallet"
+	else
+		Carry.Take(player, "StockBox")
+	end
 end
 
 -- Customers at the counter --------------------------------------------------------------
@@ -1523,8 +1560,11 @@ local function simulateTick()
 				if stocker and StoreService.PalletHasBox(st) then
 					local sh = StoreService.ShelfNeedingStock(st)
 					if sh then
-						StoreService.TakeBoxFromPallet(nil, st)
-						StoreService.RestockShelf(st, sh, StoreService.BoxUnits(st), stocker)
+						local okTake, units = StoreService.TakeBoxFromPallet(nil, st)
+						if okTake then
+							local _, left = StoreService.RestockShelf(st, sh, units, stocker)
+							StoreService.ReturnUnitsToPallet(st, left)
+						end
 					end
 				end
 			end
@@ -1539,9 +1579,17 @@ local function returnBox(kind, data)
 	end
 	if data.Source == "Pallet" and data.Store then
 		local st = stores[data.Store]
-		if st and st.Pallet and st.Pallet.Boxes < st.Cfg.MaxPendingBoxes then
-			st.Pallet.Boxes += 1
-			refreshPallet(st)
+		if st and st.Pallet then
+			StoreService.ReturnUnitsToPallet(st, data.Units or StoreService.BoxUnits(st))
+		end
+	elseif data.Source == "Stockroom" and data.Opened and data.Store then
+		-- an opened generic box already became this store's product: its leftovers go to the store's own pallet-less shelf pool
+		local st = stores[data.Store]
+		if st then
+			local sh = StoreService.ShelfNeedingStock(st)
+			if sh then
+				StoreService.RestockShelf(st, sh, data.Units or 0, nil)
+			end
 		end
 	elseif (data.Source == "Stockroom" or data.Source == "Dock") and data.Mall then
 		for _, lg in pairs(logistics) do
@@ -1557,9 +1605,25 @@ local function returnBox(kind, data)
 	end
 end
 
+-- Dropping a pallet box within reach of its own pallet puts it straight back (with its remaining units)
+local function dropNearPallet(player, kind, data, position)
+	if kind ~= "StockBox" or type(data) ~= "table" or data.Source ~= "Pallet" or not data.Store then
+		return false
+	end
+	local st = stores[data.Store]
+	if not st or not st.Pallet or (st.Pallet.Part.Position - position).Magnitude > 12 then
+		return false
+	end
+	StoreService.ReturnUnitsToPallet(st, data.Units or StoreService.BoxUnits(st))
+	S.MessageService.Toast(player, ("Box put back on the delivery point (%d units)."):format(data.Units or StoreService.BoxUnits(st)), "good")
+	push(st.Owner)
+	return true
+end
+
 function StoreService.Init(services)
 	S = services
 	Carry.OnExpire = returnBox
+	Carry.OnDrop = dropNearPallet
 end
 
 function StoreService.Start()

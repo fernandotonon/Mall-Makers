@@ -12,6 +12,7 @@ local carried = {} -- player -> { Kind, Data, Model }
 -- boxes never expire; baskets just vanish (new ones respawn anyway).
 local DROP_TIMEOUT = 150
 Carry.OnExpire = nil -- function(kind, data) set by StoreService
+Carry.OnDrop = nil -- function(player, kind, data, position) -> handled?  (StoreService: drop beside the pallet = put back)
 local droppedFolder
 
 local ASSET_FOR = { StockBox = "StockBox", LostBox = "StockBox", Basket = "Basket" }
@@ -119,6 +120,9 @@ function Carry.Drop(player)
 		pos = hit.Position
 	else
 		pos = ahead - Vector3.new(0, (hum and hum.HipHeight or 2) + root.Size.Y / 2, 0)
+	end
+	if Carry.OnDrop and Carry.OnDrop(player, c.Kind, c.Data, pos) then
+		return true
 	end
 	local model = AssetRegistry.Place(ASSET_FOR[c.Kind] or "StockBox", CFrame.new(pos) * CFrame.Angles(0, math.random() * math.pi * 2, 0), ensureDropped(), 0)
 	model.Name = "Dropped_" .. c.Kind
