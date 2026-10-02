@@ -206,7 +206,8 @@ local function buildEscalator(parent, o, y, ex)
 	ramp.Transparency = 1
 	ramp.CanQuery = false
 	-- decorative asset centred on the ramp footprint (pivot = bottom centre of its bbox)
-	local m = AssetRegistry.Place("Escalator", CFrame.new(o.X + ex, y, o.Z + (bottomZ + topZ) / 2), parent, 0)
+	-- the generated escalator mesh rises toward -Z: turn it so its low end is at bottomZ
+	local m = AssetRegistry.Place("Escalator", CFrame.new(o.X + ex, y, o.Z + (bottomZ + topZ) / 2), parent, AssetRegistry.HasImported("Escalator") and 180 or 0)
 	for _, d in ipairs(m:GetDescendants()) do
 		if d:IsA("BasePart") then
 			d.CanCollide = false

@@ -12,7 +12,7 @@
   Shelf needed a 180° turn (`YAW_FIX` in organize_import.lua).
 - `AssetRegistry.PREFER_PROCEDURAL = { Storefront = true }`: the generated storefront has a solid back
   wall that closes the store; the code-built one stays until the mesh gets an opening.
-- Escalator glass balustrades are invisible (collision only) when the escalator mesh is used.
+- Escalator glass balustrades are invisible (collision only) when the escalator mesh is used; the mesh rises toward -Z, so it is placed with a 180° turn.
 - Known for the user's mesh pass: trash cans (and a few props) carry a flat square base plate; shelf
   product cartons sit inside the shelf mesh (positions come from the old procedural layout).
 
