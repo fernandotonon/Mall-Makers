@@ -138,6 +138,49 @@ local function objectives(player, profile)
 	return list, current
 end
 
+-- First-store tutorial: which world target the client should point an arrow at. Ends after the
+-- first sale in the starter store; the objective card takes over from there.
+local function tutorialState(player, profile)
+	if profile.CurrentMall ~= 1 then
+		return nil
+	end
+	local floor = S.FloorService.GetFloor(player)
+	local st = floor and S.StoreService.Get(1, floor, "A")
+	if not st or not st.Pallet or not st.Counter then
+		return nil
+	end
+	if (st.Data.Ledger.Served or 0) >= 1 then
+		return nil
+	end
+	local carrying = player.Character and player.Character:GetAttribute("Carrying")
+	local shelf = S.StoreService.ShelfNeedingStock(st)
+	local targets = {
+		Store = (st.Frame * CFrame.new(0, 0, S.MallService.LOT_D / 2 + 5)).Position,
+		Pallet = st.Pallet.Part.Position,
+		Shelf = shelf and shelf.Part.Position or nil,
+		Counter = st.Counter.Part.Position,
+	}
+	local step
+	if carrying == "StockBox" then
+		step = "Restock"
+	elseif st.Pallet.Boxes > 0 then
+		step = "TakeBox"
+	elseif st.Pallet.Pending > 0 then
+		step = "WaitBox"
+	elseif S.StoreService.TotalStock(st) == 0 then
+		step = "OrderBox"
+	else
+		step = "Serve"
+	end
+	return { Step = step, Targets = targets }
+end
+
+function ProgressService.TutorialStep(player)
+	local profile = S.DataService.GetProfile(player)
+	local t = profile and tutorialState(player, profile)
+	return t and t.Step or nil
+end
+
 -- Snapshot -----------------------------------------------------------------------------------
 
 local function snapshot(player)
@@ -203,6 +246,7 @@ local function snapshot(player)
 		DevMode = S.DataService.IsDevMode(),
 		MockSave = S.DataService.IsMock(),
 		Accent = profile.Cosmetic.Accent,
+		Tutorial = tutorialState(player, profile),
 	}
 end
 

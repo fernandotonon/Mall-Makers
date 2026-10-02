@@ -129,6 +129,8 @@ All interactions are ProximityPrompts or big icon buttons: no typing, no aiming.
   the sum of the present contributors; completion is saved for every contributor (solo completion works).
   Mall 1: elevator restoration (teleporting elevator with floor buttons). Mall 2: loading dock expansion
   (bigger deliveries).
+- **Tutorial arrow**: guides a new owner to the first store, the first box order, the first restock and
+  the first sale (`TutorialController`, state from the server).
 - **Leaderboards**: three all-time boards on the south wall of every floor (richest, top sellers, most
   customers served) backed by OrderedDataStores (`Economy.Leaderboards`).
 - **Recovery**: stray baskets on every floor pay $5 each at the basket stand.

@@ -330,6 +330,9 @@ function StoreService.TakeBoxFromPallet(player, st)
 	end
 	p.Boxes -= 1
 	refreshPallet(st)
+	if player then
+		push(st.Owner)
+	end
 	return true
 end
 

@@ -1,5 +1,16 @@
 # Development log — Shoprise
 
+## 2026-10-02 — Empty shelves and the first-store tutorial
+
+- Customers who find an empty shelf now walk to another shelf that has stock; if every shelf is empty
+  they wait at the shelf (orange "🥛?" bubble) for up to their patience and take products as soon as a
+  restock lands, on whichever shelf was filled. Verified: waiting customer -> restock on the other
+  shelf -> walked over, took 3, queued, served, left.
+- Tutorial arrow (`TutorialController`, server state in `ProgressService.tutorialState`): a bouncing
+  arrow with a label guides the first store: "Your store is here" while far away, then order a box,
+  box on its way, take the box, restock this shelf, serve customers here. It ends after the first sale.
+  AlwaysOnTop billboards do not appear in Studio screen captures, so the arrow is a world billboard.
+
 ## 2026-10-01 (night) — Leaderboards and a lighter phone HUD
 
 - `LeaderboardService`: three all-time boards (Richest, Top sellers, Most customers served) on the south

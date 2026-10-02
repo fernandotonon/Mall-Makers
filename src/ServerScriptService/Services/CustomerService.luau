@@ -114,14 +114,18 @@ local function queueLoop(c, st, waitingState)
 	end
 end
 
-local function lifecycleRestock(c, st)
-	local shelf
+local function pickStockedShelf(st, avoid)
+	local best
 	for _, sh in ipairs(st.Shelves) do
-		if sh.Stock > 0 and (not shelf or math.random() < 0.5) then
-			shelf = sh
+		if sh ~= avoid and sh.Stock > 0 and (not best or sh.Stock > best.Stock) then
+			best = sh
 		end
 	end
-	shelf = shelf or st.Shelves[math.random(#st.Shelves)]
+	return best
+end
+
+local function lifecycleRestock(c, st)
+	local shelf = pickStockedShelf(st) or st.Shelves[math.random(#st.Shelves)]
 	if not pathIn(c, shelf.Spot) then
 		return
 	end
@@ -133,10 +137,50 @@ local function lifecycleRestock(c, st)
 		return
 	end
 	if shelf.Stock <= 0 then
-		bubble(c, "😕 empty", Color3.fromRGB(200, 60, 50))
-		c.Angry = true
-		S.StoreService.CustomerLeftAngry(st, "empty")
-		task.wait(1)
+		-- another shelf still has products: go there
+		local other = pickStockedShelf(st, shelf)
+		if other then
+			shelf = other
+			S.NpcService.MoveTo(c.Npc, shelf.Spot, 8)
+			S.NpcService.Face(c.Npc, shelf.Part.Position)
+		else
+			-- nothing on any shelf: wait for a restock (patience), then take from whichever shelf got stocked
+			c.State = "WaitingStock"
+			bubble(c, st.Cfg.ProductIcon .. "?", Color3.fromRGB(220, 130, 40))
+			local deadline = os.clock() + S.StoreService.Patience(st)
+			local found
+			while alive(c) and os.clock() < deadline do
+				found = pickStockedShelf(st)
+				if found then
+					break
+				end
+				task.wait(0.5)
+			end
+			if not alive(c) then
+				return
+			end
+			if not found then
+				bubble(c, "😕 empty", Color3.fromRGB(200, 60, 50))
+				c.Angry = true
+				S.StoreService.CustomerLeftAngry(st, "empty")
+				task.wait(0.8)
+				return
+			end
+			if found ~= shelf then
+				shelf = found
+				S.NpcService.MoveTo(c.Npc, shelf.Spot, 8)
+				S.NpcService.Face(c.Npc, shelf.Part.Position)
+			end
+			bubble(c, st.Cfg.ProductIcon .. "!")
+			task.wait(0.6)
+		end
+	end
+	if not alive(c) or shelf.Stock <= 0 then
+		-- someone emptied it in the meantime: give up gracefully
+		if alive(c) then
+			c.Angry = true
+			S.StoreService.CustomerLeftAngry(st, "empty")
+		end
 		return
 	end
 	local want = math.random(st.Cfg.ItemsPerCustomer[1], st.Cfg.ItemsPerCustomer[2])
