@@ -6,11 +6,11 @@
 ]]
 return {
 	GamePasses = {
-		VIP = { Id = 0, Price = 25, Name = "VIP", Icon = "⭐", Desc = "Gold VIP name tag above your character and the gold storefront colour." },
-		StylePack = { Id = 0, Price = 15, Name = "Style Pack", Icon = "🎨", Desc = "Five extra storefront colours and a glowing neon sign." },
+		VIP = { Id = 2006438595, Price = 25, Name = "VIP", Icon = "⭐", Desc = "Gold VIP name tag above your character and the gold storefront colour." },
+		StylePack = { Id = 2007026607, Price = 15, Name = "Style Pack", Icon = "🎨", Desc = "Five extra storefront colours and a glowing neon sign." },
 	},
 	Products = {
-		MallRush = { Id = 0, Price = 1, Name = "Mall Rush", Icon = "⚡", Minutes = 10, Desc = "10 minutes of extra customers for every store in this server. Everyone gets thanked by your name!" },
+		MallRush = { Id = 3716110864, Price = 1, Name = "Mall Rush", Icon = "⚡", Minutes = 10, Desc = "10 minutes of extra customers for every store in this server. Everyone gets thanked by your name!" },
 	},
 	-- storefront sign colours: index -> colour; Requires = pass id needed
 	Accents = {

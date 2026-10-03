@@ -4,11 +4,11 @@
 	Stat paths read the saved profile (see AchievementService for the special checks).
 ]]
 return {
-	{ Id = "Welcome", Name = "Grand Opening", Icon = "🎉", Desc = "Join Shoprise and get your first shop.", Check = "Always", BadgeId = 0 },
-	{ Id = "FirstSale", Name = "First Customer", Icon = "🧾", Desc = "Serve your first customer.", Stat = "Stats.CustomersServed", Goal = 1, BadgeId = 0 },
-	{ Id = "Served100", Name = "Regulars", Icon = "🛒", Desc = "Serve 100 customers.", Stat = "Stats.CustomersServed", Goal = 100, BadgeId = 0 },
-	{ Id = "Served1000", Name = "Crowd Favourite", Icon = "🏆", Desc = "Serve 1,000 customers.", Stat = "Stats.CustomersServed", Goal = 1000, BadgeId = 0 },
-	{ Id = "Revenue1K", Name = "Small Business", Icon = "💵", Desc = "Earn $1,000 in lifetime sales.", Stat = "Stats.LifetimeRevenue", Goal = 1000, BadgeId = 0 },
+	{ Id = "Welcome", Name = "Grand Opening", Icon = "🎉", Desc = "Join Shoprise and get your first shop.", Check = "Always", BadgeId = 327334513378892 },
+	{ Id = "FirstSale", Name = "First Customer", Icon = "🧾", Desc = "Serve your first customer.", Stat = "Stats.CustomersServed", Goal = 1, BadgeId = 162787550783178 },
+	{ Id = "Served100", Name = "Regulars", Icon = "🛒", Desc = "Serve 100 customers.", Stat = "Stats.CustomersServed", Goal = 100, BadgeId = 1890283646031122 },
+	{ Id = "Served1000", Name = "Crowd Favourite", Icon = "🏆", Desc = "Serve 1,000 customers.", Stat = "Stats.CustomersServed", Goal = 1000, BadgeId = 2565512474796555 },
+	{ Id = "Revenue1K", Name = "Small Business", Icon = "💵", Desc = "Earn $1,000 in lifetime sales.", Stat = "Stats.LifetimeRevenue", Goal = 1000, BadgeId = 810313009306035 },
 	{ Id = "Revenue10K", Name = "Entrepreneur", Icon = "💰", Desc = "Earn $10,000 in lifetime sales.", Stat = "Stats.LifetimeRevenue", Goal = 10000, BadgeId = 0 },
 	{ Id = "Revenue100K", Name = "Mall Mogul", Icon = "👑", Desc = "Earn $100,000 in lifetime sales.", Stat = "Stats.LifetimeRevenue", Goal = 100000, BadgeId = 0 },
 	{ Id = "Savings", Name = "Rainy Day Fund", Icon = "🏦", Desc = "Have $5,000 in cash at once.", Stat = "Cash", Goal = 5000, BadgeId = 0 },
