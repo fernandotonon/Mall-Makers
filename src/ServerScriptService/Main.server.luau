@@ -19,6 +19,7 @@ local ORDER = {
 	"RecoveryService",
 	"ProgressService",
 	"LeaderboardService",
+	"AchievementService",
 	"ActionService",
 }
 

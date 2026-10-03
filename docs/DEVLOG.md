@@ -1,5 +1,14 @@
 # Development log — Shoprise
 
+## 2026-10-02 — Achievements and badges
+
+- `Config/Achievements.luau` (15 achievements: first sale, 100/1,000 served, $1K/$10K/$100K lifetime
+  sales, $5K savings, first hire, 3 workers, 3 stores, elevator, Downtown, assist bonuses, baskets).
+  `AchievementService` checks every 5 s and on join, stores `profile.Achievements[id] = time`, toasts
+  and celebrates, and awards a Roblox badge when `BadgeId` is set (also retroactively on the next join).
+  New "Awards" tab in the panel with progress per achievement.
+- Badges must be created on Creator Hub; until their ids are filled in, achievements are in-game only.
+
 ## 2026-10-02 — Generated meshes in the game
 
 - Batch complete (30/30 TRELLIS.2 + BiRefNet matte; Shelf at res 512). postprocess.py + combine.py ->

@@ -41,6 +41,7 @@ local function newProfile()
 		Milestones = {},
 		Stats = { LifetimeRevenue = 0, CustomersServed = 0, AssistEarned = 0, BasketsReturned = 0, SelfServes = {} },
 		TipsSeen = {},
+		Achievements = {}, -- id -> os.time() when earned
 		Cosmetic = { Accent = 1 },
 		Created = os.time(),
 	}

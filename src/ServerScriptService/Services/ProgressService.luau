@@ -247,6 +247,7 @@ local function snapshot(player)
 		MockSave = S.DataService.IsMock(),
 		Accent = profile.Cosmetic.Accent,
 		Tutorial = tutorialState(player, profile),
+		Achievements = S.AchievementService and S.AchievementService.List(player) or {},
 	}
 end
 

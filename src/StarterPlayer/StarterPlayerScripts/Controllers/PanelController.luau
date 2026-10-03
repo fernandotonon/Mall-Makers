@@ -287,6 +287,32 @@ tabs.Style = function(state)
 	end
 end
 
+tabs.Awards = function(state)
+	local list = state.Achievements or {}
+	local done = 0
+	for _, a in ipairs(list) do
+		if a.Done then
+			done += 1
+		end
+	end
+	local head = card(content, 0)
+	UI.Label(head, ("🏅 Achievements: %d / %d"):format(done, #list), UDim2.new(1, 0, 0, 24), { Font = Enum.Font.GothamBold, TextSize = 16, Order = 1 })
+	for i, a in ipairs(list) do
+		local c = card(content, i)
+		c.BackgroundColor3 = a.Done and Color3.fromRGB(40, 70, 55) or UI.Colors.Card
+		local r = row(c, 1)
+		r.Size = UDim2.new(1, 0, 0, 40)
+		UI.Label(r, a.Done and a.Icon or "🔒", UDim2.new(0, 36, 1, 0), { TextSize = 24, Order = 1, Align = Enum.TextXAlignment.Center })
+		local text = UI.Frame(r, UDim2.new(1, -150, 1, 0), nil, UI.Colors.Card)
+		text.BackgroundTransparency = 1
+		text.LayoutOrder = 2
+		UI.Label(text, a.Name .. (a.Badge and "  · badge" or ""), UDim2.new(1, 0, 0, 20), { Font = Enum.Font.GothamBold, TextSize = 14, Color = a.Done and UI.Colors.Good or nil })
+		UI.Label(text, a.Desc, UDim2.new(1, 0, 0, 18), { Pos = UDim2.fromOffset(0, 20), TextSize = 12, Color = UI.Colors.Muted })
+		local status = a.Done and "✅ Done" or (a.Goal > 1 and ("%s / %s"):format(Format.Short(a.Progress), Format.Short(a.Goal)) or "Not yet")
+		UI.Label(r, status, UDim2.new(0, 100, 1, 0), { TextSize = 13, Order = 3, Align = Enum.TextXAlignment.Right, Color = a.Done and UI.Colors.Good or UI.Colors.Muted })
+	end
+end
+
 -- Panel shell -------------------------------------------------------------------------------
 
 local function render()
@@ -353,8 +379,8 @@ local function build()
 	tabBar.BackgroundTransparency = 1
 	UI.List(tabBar, 6, true)
 	tabButtons = {}
-	for i, name in ipairs({ "Business", "Stores", "Workers", "Mall", "Style" }) do
-		tabButtons[name] = UI.Button(tabBar, name, UDim2.new(0.2, -5, 1, 0), UI.Colors.Card2, function()
+	for i, name in ipairs({ "Business", "Stores", "Workers", "Mall", "Awards", "Style" }) do
+		tabButtons[name] = UI.Button(tabBar, name, UDim2.new(1 / 6, -5, 1, 0), UI.Colors.Card2, function()
 			currentTab = name
 			render()
 		end, { Order = i, TextSize = 14 })
