@@ -42,7 +42,8 @@ local function newProfile()
 		Stats = { LifetimeRevenue = 0, CustomersServed = 0, AssistEarned = 0, BasketsReturned = 0, SelfServes = {} },
 		TipsSeen = {},
 		Achievements = {}, -- id -> os.time() when earned
-		Cosmetic = { Accent = 1 },
+		Cosmetic = { Accent = 1, Neon = false },
+		Receipts = {}, -- developer product PurchaseId -> os.time()
 		Created = os.time(),
 	}
 	for _, mall in ipairs(Malls) do

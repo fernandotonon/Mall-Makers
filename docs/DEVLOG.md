@@ -1,5 +1,20 @@
 # Development log — Shoprise
 
+## 2026-10-02 — Shop, styles and session rewards
+
+- Monetization is looks and fun only (user decision): no cash, stores or project progress for Robux.
+  `Config/Shop.luau`: passes VIP (gold name tag + gold sign colour, suggested R$25) and Style Pack
+  (5 extra sign colours + neon sign, R$15); developer product Mall Rush (R$1: 10 min of extra
+  customers for every store in the server, buyer thanked by name). Ids are 0 until created on
+  Creator Hub; with id 0 the button says "Coming soon" (live) or grants a test purchase (Studio).
+- `ShopService`: pass ownership (UserOwnsGamePassAsync + PromptGamePassPurchaseFinished), idempotent
+  ProcessReceipt (profile.Receipts), sign colour/neon applied whenever a store is built (fixes the
+  colour resetting after rejoin), boosts with server-time expiry.
+- Session rewards for minutes played this session (5/15/30/45/60/90 min: $100, 10 min Express
+  Delivery, 10 min Rush in your stores, $400, 20 min Express, 20 min Rush), claimed in the new Shop
+  tab; a toast tells the player when one is ready. Express Delivery makes stock arrive in 1 s;
+  Rush uses the existing rush-hour spawn boost per store. HUD shows active boosts under the cash.
+
 ## 2026-10-02 — Achievements and badges
 
 - `Config/Achievements.luau` (15 achievements: first sale, 100/1,000 served, $1K/$10K/$100K lifetime

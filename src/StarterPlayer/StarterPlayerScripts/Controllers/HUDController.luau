@@ -18,7 +18,7 @@ HUD.OnState = Signal.new()
 HUD.OnOpenPanel = Signal.new() -- (tabName)
 
 local player = Players.LocalPlayer
-local gui, cashLabel, placeLabel, objectiveLabel, toastHolder, saveLabel, dropButton
+local gui, cashLabel, placeLabel, objectiveLabel, toastHolder, saveLabel, dropButton, boostLabel
 local shownCash = 0
 
 local function build()
@@ -43,6 +43,30 @@ local function build()
 	UI.Corner(cash, 14)
 	cashLabel = UI.Label(cash, "$0", UDim2.new(1, 0, 0, mobile and 28 or 32), { Pos = UDim2.fromOffset(0, 3), Font = Enum.Font.GothamBlack, TextSize = mobile and 24 or 28, Color = UI.Colors.Good, Align = Enum.TextXAlignment.Center })
 	placeLabel = UI.Label(cash, "", UDim2.new(1, 0, 0, 16), { Pos = UDim2.fromOffset(0, mobile and 30 or 35), TextSize = mobile and 11 or 12, Color = UI.Colors.Muted, Align = Enum.TextXAlignment.Center })
+	-- active boosts (Rush / Express Delivery) under the cash pill
+	boostLabel = UI.Label(gui, "", UDim2.fromOffset(260, 18), { Pos = UDim2.new(0.5, -130, 0, cashH + 8), TextSize = 12, Color = UI.Colors.Good, Align = Enum.TextXAlignment.Center, Font = Enum.Font.GothamBold })
+	task.spawn(function()
+		while true do
+			task.wait(1)
+			local shop = HUD.State and HUD.State.Shop
+			local parts = {}
+			if shop then
+				local t = workspace:GetServerTimeNow()
+				local function mmss(x)
+					x = math.max(0, math.floor(x))
+					return ("%d:%02d"):format(x // 60, x % 60)
+				end
+				local rushEnd = math.max(shop.Boosts.ServerRush, shop.Boosts.Rush)
+				if rushEnd > t then
+					table.insert(parts, "⚡ Rush " .. mmss(rushEnd - t))
+				end
+				if shop.Boosts.Express > t then
+					table.insert(parts, "🚚 Express " .. mmss(shop.Boosts.Express - t))
+				end
+			end
+			boostLabel.Text = table.concat(parts, "   ")
+		end
+	end)
 
 	-- objective card: flush with the top-right corner, compact
 	local objW, objH = mobile and 230 or 300, mobile and 46 or 56

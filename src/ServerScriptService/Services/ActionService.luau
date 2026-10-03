@@ -69,7 +69,21 @@ handlers.Travel = function(player, p)
 end
 
 handlers.SetAccent = function(player, p)
-	S.ProgressService.SetAccent(player, p.Index)
+	S.ShopService.SetAccent(player, p.Index)
+end
+
+handlers.SetNeon = function(player, p)
+	S.ShopService.SetNeon(player, p.On == true)
+end
+
+handlers.ShopClaim = function(player, p)
+	S.ShopService.Claim(player, tonumber(p.Index))
+end
+
+handlers.ShopTestGrant = function(player, p)
+	if type(p.Key) == "string" then
+		S.ShopService.TestGrant(player, p.Key)
+	end
 end
 
 handlers.DropCarry = function(player)

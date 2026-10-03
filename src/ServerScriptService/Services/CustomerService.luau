@@ -322,6 +322,7 @@ local function spawnerTick()
 		for f = 1, mall.Floors do
 			if S.FloorService.IsFloorActive(mall.Id, f) then
 				for _, st in ipairs(S.StoreService.ActiveStoresOn(mall.Id, f)) do
+					local rush = rush or S.ShopService.RushActive(st)
 					local max = Economy.Customers.MaxPerStore + (rush and 2 or 0)
 					if countIn(st) < max and total < Economy.Customers.MaxPerServer then
 						st.NextSpawn = st.NextSpawn or now + 2

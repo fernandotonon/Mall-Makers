@@ -299,7 +299,7 @@ function StoreService.OrderStock(player, st)
 	p.Pending += 1
 	refreshPallet(st)
 	S.MessageService.Tip(player, "OrderStock", "Stock is a cost: each box you buy is money out until the units are sold. Keep shelves filled, not overfilled.")
-	task.delay(st.Cfg.DeliverySeconds, function()
+	task.delay(S.ShopService.DeliverySeconds(st.Owner, st.Cfg.DeliverySeconds), function()
 		if stores[st.Key] ~= st then
 			return
 		end
@@ -1186,6 +1186,7 @@ local function buildStore(player, mallId, floor, lot, profile)
 	}
 	stores[k] = st
 	sign(st, ("%s · %s"):format(cfg.Name, player.DisplayName), cfg.Color)
+	S.ShopService.ApplyStyle(st)
 	buildInterior(st)
 	-- distribute saved stock over the shelves
 	local remaining = data.Stock or 0
@@ -1279,11 +1280,12 @@ function StoreService.OrderDelivery(player, lg)
 	lg.Dock.Pending = true
 	refreshLogistics(lg)
 	S.MessageService.Tip(player, "Logistics", "Downtown deliveries are generic supplies: dock -> stockroom -> any store. Stockroom space is the bottleneck. Upgrade it in the Business panel.")
+	local deliverySecs = S.ShopService.DeliverySeconds(player, L.DeliverySeconds)
 	-- van drives in
 	local van = lg.Van
 	local parked = van:GetPivot()
 	task.spawn(function()
-		local dur = L.DeliverySeconds * 0.8
+		local dur = deliverySecs * 0.8
 		local t0 = os.clock()
 		while os.clock() - t0 < dur and van.Parent do
 			local a = (os.clock() - t0) / dur
@@ -1294,7 +1296,7 @@ function StoreService.OrderDelivery(player, lg)
 			van:PivotTo(parked)
 		end
 	end)
-	task.delay(L.DeliverySeconds, function()
+	task.delay(deliverySecs, function()
 		if logistics[("%d:%d"):format(lg.MallId, lg.Floor)] ~= lg then
 			return
 		end

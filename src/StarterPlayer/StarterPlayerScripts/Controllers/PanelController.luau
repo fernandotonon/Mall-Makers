@@ -5,6 +5,7 @@
 ]]
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local MarketplaceService = game:GetService("MarketplaceService")
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Format = require(ReplicatedStorage.Shared.Format)
 local Constants = require(ReplicatedStorage.Shared.Constants)
@@ -274,17 +275,120 @@ tabs.Mall = function(state)
 	UI.Label(sc, ("📈 Lifetime: %s revenue · %d customers served · %s assist bonuses · %d baskets returned"):format(Format.Cash(state.Stats.Revenue), state.Stats.Served, Format.Cash(state.Stats.Assist), state.Stats.Baskets), UDim2.new(1, 0, 0, 36), { TextSize = 13, Color = UI.Colors.Muted })
 end
 
+local function mmss(seconds)
+	seconds = math.max(0, math.floor(seconds))
+	return ("%d:%02d"):format(seconds // 60, seconds % 60)
+end
+
 tabs.Style = function(state)
-	local c = card(content, 1)
-	UI.Label(c, "🎨 Storefront accent colour (cosmetic)", UDim2.new(1, 0, 0, 24), { Font = Enum.Font.GothamBold, TextSize = 16, Order = 1 })
-	local r = row(c, 2)
-	r.Size = UDim2.new(1, 0, 0, 40)
-	local colors = { Color3.fromRGB(64, 150, 150), Color3.fromRGB(240, 120, 100), Color3.fromRGB(140, 110, 200), Color3.fromRGB(250, 170, 60), Color3.fromRGB(90, 180, 90) }
-	for i, col in ipairs(colors) do
-		UI.Button(r, state.Accent == i and "●" or "", UDim2.new(0, 40, 1, 0), col, function()
-			act("SetAccent", { Index = i })
-		end, { Order = i })
+	local shop = state.Shop
+	if not shop then
+		return
 	end
+	local c = card(content, 1)
+	UI.Label(c, "🎨 Storefront sign colour", UDim2.new(1, 0, 0, 24), { Font = Enum.Font.GothamBold, TextSize = 16, Order = 1 })
+	local r = row(c, 2)
+	r.Size = UDim2.new(1, 0, 0, 44)
+	for _, a in ipairs(shop.Accents) do
+		local label = shop.Accent == a.Index and "●" or (a.Locked and "🔒" or "")
+		local b = UI.Button(r, label, UDim2.new(0, 44, 1, 0), a.Color, function()
+			act("SetAccent", { Index = a.Index })
+		end, { Order = a.Index, TextSize = 18 })
+		if a.Locked then
+			b.BackgroundTransparency = 0.45
+		end
+	end
+	UI.Label(c, "🔒 colours: hot pink, sky, lime, crimson and midnight come with the Style Pack; gold with VIP.", UDim2.new(1, 0, 0, 18), { Order = 3, TextSize = 12, Color = UI.Colors.Muted })
+	local n = card(content, 2)
+	UI.Label(n, "💡 Neon sign" .. (shop.Passes.StylePack.Owned and "" or "  (Style Pack)"), UDim2.new(1, 0, 0, 24), { Font = Enum.Font.GothamBold, TextSize = 16, Order = 1 })
+	local nr = row(n, 2)
+	UI.Button(nr, shop.Neon and "Neon: ON" or "Neon: OFF", UDim2.new(0, 140, 1, 0), shop.Neon and UI.Colors.Accent or UI.Colors.Card2, function()
+		act("SetNeon", { On = not shop.Neon })
+	end, { Order = 1, TextSize = 14 })
+end
+
+local function buy(kind, key, item)
+	if item.Id and item.Id ~= 0 then
+		if kind == "Pass" then
+			MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, item.Id)
+		else
+			MarketplaceService:PromptProductPurchase(Players.LocalPlayer, item.Id)
+		end
+	else
+		act("ShopTestGrant", { Key = key })
+	end
+end
+
+tabs.Shop = function(state)
+	local shop = state.Shop
+	if not shop then
+		return
+	end
+	local t = workspace:GetServerTimeNow()
+	-- active boosts
+	local active = {}
+	if shop.Boosts.ServerRush > t then
+		table.insert(active, ("⚡ Mall Rush %s%s"):format(mmss(shop.Boosts.ServerRush - t), shop.Boosts.ServerRushBy and (" (thanks " .. shop.Boosts.ServerRushBy .. ")") or ""))
+	end
+	if shop.Boosts.Rush > t then
+		table.insert(active, "⚡ Your Rush " .. mmss(shop.Boosts.Rush - t))
+	end
+	if shop.Boosts.Express > t then
+		table.insert(active, "🚚 Express Delivery " .. mmss(shop.Boosts.Express - t))
+	end
+	-- session rewards
+	local rc = card(content, 1)
+	local played = (t - shop.SessionStart) / 60
+	UI.Label(rc, ("🎁 Session rewards · played %s this session"):format(mmss(played * 60)), UDim2.new(1, 0, 0, 24), { Font = Enum.Font.GothamBold, TextSize = 16, Order = 1 })
+	if #active > 0 then
+		UI.Label(rc, "Active: " .. table.concat(active, "  ·  "), UDim2.new(1, 0, 0, 20), { Order = 2, TextSize = 13, Color = UI.Colors.Good })
+	end
+	for i, r in ipairs(shop.Rewards) do
+		local rr = row(rc, 10 + i)
+		rr.Size = UDim2.new(1, 0, 0, 36)
+		UI.Label(rr, ("%d min"):format(r.Minutes), UDim2.new(0, 70, 1, 0), { Order = 1, TextSize = 14, Font = Enum.Font.GothamBold })
+		UI.Label(rr, r.Text, UDim2.new(1, -230, 1, 0), { Order = 2, TextSize = 14 })
+		local ready = played >= r.Minutes
+		local label = r.Claimed and "✅ Claimed" or (ready and "Claim" or ("in " .. mmss((r.Minutes - played) * 60)))
+		UI.Button(rr, label, UDim2.new(0, 140, 1, 0), (ready and not r.Claimed) and UI.Colors.Accent or UI.Colors.Card2, function()
+			if ready and not r.Claimed then
+				act("ShopClaim", { Index = r.Index })
+			end
+		end, { Order = 3, TextSize = 13 })
+	end
+	-- Robux items
+	local items = {
+		{ "Product", "MallRush", shop.Products.MallRush },
+		{ "Pass", "VIP", shop.Passes.VIP },
+		{ "Pass", "StylePack", shop.Passes.StylePack },
+	}
+	for i, it in ipairs(items) do
+		local kind, key, item = it[1], it[2], it[3]
+		local c = card(content, 20 + i)
+		local r = row(c, 1)
+		r.Size = UDim2.new(1, 0, 0, 52)
+		UI.Label(r, item.Icon, UDim2.new(0, 40, 1, 0), { Order = 1, TextSize = 26, Align = Enum.TextXAlignment.Center })
+		local text = UI.Frame(r, UDim2.new(1, -220, 1, 0), nil, UI.Colors.Card)
+		text.BackgroundTransparency = 1
+		text.LayoutOrder = 2
+		UI.Label(text, item.Name, UDim2.new(1, 0, 0, 22), { Font = Enum.Font.GothamBold, TextSize = 15 })
+		UI.Label(text, item.Desc, UDim2.new(1, 0, 0, 28), { Pos = UDim2.fromOffset(0, 22), TextSize = 12, Color = UI.Colors.Muted, Wrap = true })
+		local label
+		if item.Owned then
+			label = "✅ Owned"
+		elseif item.Id == 0 then
+			label = shop.Studio and "Test (Studio)" or "Coming soon"
+		else
+			label = ("R$ %d"):format(item.Price)
+		end
+		UI.Button(r, label, UDim2.new(0, 160, 1, -8), item.Owned and UI.Colors.Card2 or UI.Colors.Good, function()
+			if not item.Owned and (item.Id ~= 0 or shop.Studio) then
+				buy(kind, key, item)
+			end
+		end, { Order = 3, TextSize = 15 })
+	end
+	local note = card(content, 30)
+	UI.Label(note, "Everything in the shop is just for looks and fun: you cannot buy money, stores or project progress.", UDim2.new(1, 0, 0, 20), { TextSize = 12, Color = UI.Colors.Muted })
 end
 
 tabs.Awards = function(state)
@@ -379,8 +483,8 @@ local function build()
 	tabBar.BackgroundTransparency = 1
 	UI.List(tabBar, 6, true)
 	tabButtons = {}
-	for i, name in ipairs({ "Business", "Stores", "Workers", "Mall", "Awards", "Style" }) do
-		tabButtons[name] = UI.Button(tabBar, name, UDim2.new(1 / 6, -5, 1, 0), UI.Colors.Card2, function()
+	for i, name in ipairs({ "Business", "Stores", "Workers", "Mall", "Awards", "Style", "Shop" }) do
+		tabButtons[name] = UI.Button(tabBar, name, UDim2.new(1 / 7, -5, 1, 0), UI.Colors.Card2, function()
 			currentTab = name
 			render()
 		end, { Order = i, TextSize = 14 })
@@ -392,6 +496,14 @@ function Panel.Init() end
 
 function Panel.Start()
 	build()
+	task.spawn(function()
+		while true do
+			task.wait(1)
+			if root.Visible and currentTab == "Shop" then
+				render()
+			end
+		end
+	end)
 	HUD.OnOpenPanel:Connect(Panel.Open)
 	HUD.OnState:Connect(function()
 		render()

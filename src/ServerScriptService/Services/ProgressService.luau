@@ -248,6 +248,7 @@ local function snapshot(player)
 		Accent = profile.Cosmetic.Accent,
 		Tutorial = tutorialState(player, profile),
 		Achievements = S.AchievementService and S.AchievementService.List(player) or {},
+		Shop = S.ShopService and S.ShopService.State(player) or nil,
 	}
 end
 
@@ -269,23 +270,8 @@ function ProgressService.Evaluate(player)
 	ProgressService.Push(player)
 end
 
--- cosmetics: accent colour of the owner's storefront signs
-local ACCENTS = { Color3.fromRGB(64, 150, 150), Color3.fromRGB(240, 120, 100), Color3.fromRGB(140, 110, 200), Color3.fromRGB(250, 170, 60), Color3.fromRGB(90, 180, 90) }
 function ProgressService.SetAccent(player, index)
-	local profile = S.DataService.GetProfile(player)
-	index = tonumber(index)
-	if not profile or not index or not ACCENTS[index] then
-		return false
-	end
-	profile.Cosmetic.Accent = index
-	for _, st in ipairs(S.StoreService.StoresOf(player)) do
-		local sign = st.Folder:FindFirstChild("Sign")
-		if sign then
-			sign.Color = ACCENTS[index]
-		end
-	end
-	ProgressService.Push(player)
-	return true
+	return S.ShopService.SetAccent(player, index)
 end
 
 function ProgressService.Init(services)
