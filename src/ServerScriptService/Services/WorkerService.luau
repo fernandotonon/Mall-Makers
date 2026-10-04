@@ -452,6 +452,8 @@ local function buildScene(player, mallId, floor, disc)
 		label(courier.Head, disc.Text, 3.4, 320)
 		local box = AssetRegistry.Place("StockBox", CFrame.new(S.MallService.ToWorld(mallId, floor, disc.BoxPos)), folder, 25)
 		local anchor = box.PrimaryPart or box:FindFirstChildWhichIsA("BasePart", true)
+		scene.Courier = courier
+		scene.Box = box
 		label(anchor, "📦 Lost delivery", 3.5, 160)
 		prompt(anchor, "Pick up lost box", "Lost delivery").Triggered:Connect(function(who)
 			if who ~= player then
@@ -637,6 +639,32 @@ function WorkerService.AssignManager(player, mallId)
 	end
 	push(player)
 	return true
+end
+
+-- Tutorial: where the first worker mission's pieces are (nil when the mission is not on this floor)
+function WorkerService.LostDeliveryTargets(player, mallId, floor)
+	for _, scene in pairs(scenes) do
+		if scene.Player == player and scene.MallId == mallId and scene.Floor == floor and scene.Disc.Kind == "LostDelivery" and scene.Folder.Parent then
+			local t = {}
+			if scene.Candidate and scene.Candidate.PrimaryPart then
+				t.Candidate = scene.Candidate.PrimaryPart.Position
+			end
+			if scene.Courier and scene.Courier.PrimaryPart then
+				t.Courier = scene.Courier.PrimaryPart.Position
+			end
+			if scene.Box and scene.Box.Parent then
+				t.Box = scene.Box:GetPivot().Position
+			else
+				local dropped = workspace:FindFirstChild("Dropped")
+				local d = dropped and dropped:FindFirstChild("Dropped_LostBox")
+				if d then
+					t.Box = d:GetPivot().Position
+				end
+			end
+			return t
+		end
+	end
+	return nil
 end
 
 function WorkerService.Init(services)

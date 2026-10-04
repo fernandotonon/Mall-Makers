@@ -428,6 +428,9 @@ function StoreService.RestockFromCarry(player, st, shelf)
 		units = StoreService.BoxUnits(st) -- generic supplies become this store's product; cost was booked at the dock
 	end
 	local _, left = StoreService.RestockShelf(st, shelf, units, player)
+	if player == st.Owner then
+		S.ProgressService.OnOwnerRestock(player)
+	end
 	if left > 0 then
 		-- keep carrying the partly used box: it now belongs to this store
 		c.Data.Units = left

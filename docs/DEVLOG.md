@@ -1,5 +1,17 @@
 # Development log — Shoprise
 
+## 2026-10-04 — Tutorial phases with a floor path
+
+- Persistent `profile.Tutorial` (Restocks, SawEmpty, RefillDone, Done). Phases: Learn (order ->
+  wait -> take -> restock -> serve the first customer), Selling (no guidance), Refill (first time
+  the shelves are empty: order -> take -> restock), Hire (first worker mission: find the lost box ->
+  return it to the courier -> hire the stocker), Done when LostDelivery is discovered. Toasts announce
+  Refill, Hire and Done. Owner restocks are counted in `ProgressService.OnOwnerRestock`.
+- `TutorialController`: client pathfinding from the character to the target, drawn as pulsing
+  orange dots on the floor (pool of 70 parts, recomputed when the player moves 3 studs), plus the
+  bouncing arrow and label over the target.
+- Badges 6-10 created (5 free per day); 5 left for the next day.
+
 ## 2026-10-02 — Shop, styles and session rewards
 
 - Monetization is looks and fun only (user decision): no cash, stores or project progress for Robux.

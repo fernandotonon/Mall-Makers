@@ -138,18 +138,51 @@ local function objectives(player, profile)
 	return list, current
 end
 
--- First-store tutorial: which world target the client should point an arrow at. Ends after the
--- first sale in the starter store; the objective card takes over from there.
+-- Tutorial phases (persistent in profile.Tutorial):
+--   Learn  : order -> take -> restock -> serve the first customer
+--   Selling: no guidance until the shelves run empty for the first time
+--   Refill : order -> take -> restock again
+--   Hire   : the first worker mission (lost delivery: find the box, return it, hire the stocker)
+local ANNOUNCE = {
+	Refill = "📦 Your shelves are empty! Follow the arrows to restock.",
+	Hire = "🤝 Great work! Time to get help: a courier lost a box on this floor. Follow the arrows.",
+	Done = "🎉 Tutorial complete! You know the basics: keep shelves full, serve customers and grow your mall.",
+}
+
+local function announce(player, tut, phase)
+	tut.Announced = tut.Announced or {}
+	if not tut.Announced[phase] then
+		tut.Announced[phase] = true
+		S.MessageService.Toast(player, ANNOUNCE[phase], phase == "Done" and "good" or "info")
+	end
+end
+
+local function stockSteps(st, carrying)
+	if carrying == "StockBox" then
+		return "Restock"
+	elseif st.Pallet.Boxes > 0 or (st.Pallet.Loose or 0) > 0 then
+		return "TakeBox"
+	elseif st.Pallet.Pending > 0 then
+		return "WaitBox"
+	end
+	return "OrderBox"
+end
+
 local function tutorialState(player, profile)
-	if profile.CurrentMall ~= 1 then
+	profile.Tutorial = profile.Tutorial or { Restocks = 0, Announced = {} }
+	local tut = profile.Tutorial
+	if tut.Done or profile.CurrentMall ~= 1 then
+		return nil
+	end
+	local mallData = profile.Malls["1"]
+	if mallData.Discovered.LostDelivery then
+		tut.Done = true
+		announce(player, tut, "Done")
 		return nil
 	end
 	local floor = S.FloorService.GetFloor(player)
 	local st = floor and S.StoreService.Get(1, floor, "A")
 	if not st or not st.Pallet or not st.Counter then
-		return nil
-	end
-	if (st.Data.Ledger.Served or 0) >= 1 then
 		return nil
 	end
 	local carrying = player.Character and player.Character:GetAttribute("Carrying")
@@ -160,19 +193,59 @@ local function tutorialState(player, profile)
 		Shelf = shelf and shelf.Part.Position or nil,
 		Counter = st.Counter.Part.Position,
 	}
-	local step
-	if carrying == "StockBox" then
-		step = "Restock"
-	elseif st.Pallet.Boxes > 0 or (st.Pallet.Loose or 0) > 0 then
-		step = "TakeBox"
-	elseif st.Pallet.Pending > 0 then
-		step = "WaitBox"
-	elseif S.StoreService.TotalStock(st) == 0 then
-		step = "OrderBox"
+	local served = (st.Data.Ledger.Served or 0) >= 1
+	local stock = S.StoreService.TotalStock(st)
+	local phase, step
+	if not served then
+		phase = "Learn"
+		step = (stock > 0 and carrying ~= "StockBox") and "Serve" or stockSteps(st, carrying)
 	else
-		step = "Serve"
+		if stock == 0 then
+			tut.SawEmpty = true
+		end
+		if not tut.SawEmpty then
+			return nil -- selling: let the player play
+		elseif not tut.RefillDone then
+			phase = "Refill"
+			step = stockSteps(st, carrying)
+			if step == "OrderBox" then
+				step = "Reorder"
+			end
+			announce(player, tut, "Refill")
+		else
+			phase = "Hire"
+			announce(player, tut, "Hire")
+			local m = S.WorkerService.LostDeliveryTargets(player, 1, floor)
+			if not m then
+				return nil
+			end
+			targets.Box, targets.Courier, targets.Candidate = m.Box, m.Courier, m.Candidate
+			if m.Candidate then
+				step = "HireWorker"
+			elseif carrying == "LostBox" then
+				step = "ReturnBox"
+			elseif carrying then
+				step = "FreeHands"
+			else
+				step = "FindBox"
+			end
+		end
 	end
-	return { Step = step, Targets = targets }
+	return { Phase = phase, Step = step, Targets = targets }
+end
+
+-- the owner restocked one of their shelves by hand
+function ProgressService.OnOwnerRestock(player)
+	local profile = S.DataService.GetProfile(player)
+	if not profile or not profile.Tutorial then
+		return
+	end
+	local tut = profile.Tutorial
+	tut.Restocks = (tut.Restocks or 0) + 1
+	if tut.SawEmpty then
+		tut.RefillDone = true
+	end
+	ProgressService.Push(player)
 end
 
 function ProgressService.TutorialStep(player)
